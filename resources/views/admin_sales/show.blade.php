@@ -125,6 +125,78 @@
                 </div>
             </div>
 
+            @if(Auth::user()->role === 'admin_vas')
+                <!-- Admin VAS Status Override Control Card -->
+                <div class="rounded-3xl bg-white border-2 border-[#9B385B]/30 p-6 shadow-sm space-y-4 text-xs">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <div class="flex items-center gap-2 font-extrabold text-sm text-[#9B385B]">
+                            <i class="fa-solid fa-sliders text-[#F48C5B]"></i>
+                            <span>Ubah Status Pengajuan (Admin VAS)</span>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FEF4F0] text-[#9B385B] border border-[#9B385B]/20">
+                            Super Admin
+                        </span>
+                    </div>
+
+                    <form action="{{ route('vas.registrations.update-status', $registration->id) }}" method="POST" class="space-y-3.5">
+                        @csrf
+                        
+                        <div>
+                            <label class="block font-bold text-[#333333] mb-1">Status Baru <span class="text-rose-500">*</span></label>
+                            <select name="status" id="adminVasStatusSelect" required onchange="toggleAdminVasRevisionBox(this.value)"
+                                    class="w-full px-3 py-2 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-xs font-bold text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#9B385B]">
+                                <option value="submitted" {{ $registration->status === 'submitted' ? 'selected' : '' }}>1. SUBMITTED (Survey Awal / Menunggu OPJ)</option>
+                                <option value="verified" {{ $registration->status === 'verified' ? 'selected' : '' }}>2. VERIFIED (Terverifikasi OPJ / Menunggu Form Pelanggan)</option>
+                                <option value="filled" {{ $registration->status === 'filled' ? 'selected' : '' }}>3. FILLED (Form Diisi Pelanggan / Menunggu C-Care)</option>
+                                <option value="approved" {{ $registration->status === 'approved' ? 'selected' : '' }}>4. APPROVED (Disetujui / Selesai Closing)</option>
+                                <option value="revision" {{ $registration->status === 'revision' ? 'selected' : '' }}>5. REVISION (Memerlukan Revisi Data/Berkas)</option>
+                            </select>
+                        </div>
+
+                        <div id="adminVasRevisionCategoryBox" class="{{ $registration->status === 'revision' ? '' : 'hidden' }} space-y-1">
+                            <label class="block font-bold text-[#333333]">Kategori Revisi</label>
+                            <select name="rejection_category"
+                                    class="w-full px-3 py-2 rounded-xl bg-white border border-gray-300 text-xs text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#9B385B]">
+                                <option value="Foto KTP Buram / Tidak Jelas" {{ $registration->rejection_category === 'Foto KTP Buram / Tidak Jelas' ? 'selected' : '' }}>Foto KTP Buram / Tidak Jelas</option>
+                                <option value="NIK / Data Identitas Tidak Sesuai" {{ $registration->rejection_category === 'NIK / Data Identitas Tidak Sesuai' ? 'selected' : '' }}>NIK / Data Identitas Tidak Sesuai</option>
+                                <option value="Foto Rumah Tidak Jelas" {{ $registration->rejection_category === 'Foto Rumah Tidak Jelas' ? 'selected' : '' }}>Foto Rumah Tidak Jelas</option>
+                                <option value="Tanda Tangan Tidak Sesuai / Belum Ada" {{ $registration->rejection_category === 'Tanda Tangan Tidak Sesuai / Belum Ada' ? 'selected' : '' }}>Tanda Tangan Tidak Sesuai / Belum Ada</option>
+                                <option value="Paket Berlangganan Perlu Penyesuaian" {{ $registration->rejection_category === 'Paket Berlangganan Perlu Penyesuaian' ? 'selected' : '' }}>Paket Berlangganan Perlu Penyesuaian</option>
+                                <option value="Perubahan Status Manual oleh Admin VAS" {{ $registration->rejection_category === 'Perubahan Status Manual oleh Admin VAS' ? 'selected' : '' }}>Perubahan Status Manual oleh Admin VAS</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-[#333333] mb-1">Catatan / Alasan Perubahan</label>
+                            <textarea name="notes" rows="3" placeholder="Alasan perubahan status pengajuan (opsional)..."
+                                      class="w-full px-3 py-2 rounded-xl bg-white border border-gray-300 text-xs text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#9B385B]">{{ $registration->rejection_notes }}</textarea>
+                        </div>
+
+                        <button type="submit" 
+                                onclick="return confirm('Apakah Anda yakin ingin mengubah status pengajuan ini?')"
+                                class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] hover:from-[#EF666B] hover:to-[#F48C5B] text-white font-bold text-xs shadow-md shadow-orange-500/20 transition-all cursor-pointer flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i>
+                            <span>Simpan Status Pengajuan</span>
+                        </button>
+                    </form>
+                </div>
+
+                @push('scripts')
+                <script>
+                    function toggleAdminVasRevisionBox(status) {
+                        const box = document.getElementById('adminVasRevisionCategoryBox');
+                        if (box) {
+                            if (status === 'revision') {
+                                box.classList.remove('hidden');
+                            } else {
+                                box.classList.add('hidden');
+                            }
+                        }
+                    }
+                </script>
+                @endpush
+            @endif
+
         </div>
 
     </div>

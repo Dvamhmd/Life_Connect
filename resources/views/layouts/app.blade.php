@@ -201,52 +201,54 @@
             <!-- Navigation Links -->
             <nav class="flex-1 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
                 
-                <!-- Role Specific Navigation -->
-                <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-3 pb-1">
-                    Menu Utama
-                </div>
+                @if(Auth::user()->role !== 'admin_vas')
+                    <!-- Role Specific Navigation -->
+                    <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-3 pb-1">
+                        Menu Utama
+                    </div>
 
-                @if(Auth::user()->role === 'admin_vas' || Auth::user()->role === 'opj')
-                    <a href="{{ route('opj.index') }}" 
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('opj.*') ? 'bg-[#FEF4F0] text-[#F48C5B] border border-[#F48C5B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
-                        <i class="fa-solid fa-map-location-dot w-5 text-center {{ request()->routeIs('opj.*') ? 'text-[#F48C5B]' : 'text-gray-400' }}"></i>
-                        <span>Dashboard OPJ</span>
-                        @php $pendOpj = \App\Models\CustomerRegistration::where('status', 'submitted')->count(); @endphp
-                        @if($pendOpj > 0)
-                            <span class="ml-auto bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $pendOpj }}</span>
-                        @endif
-                    </a>
-                @endif
+                    @if(Auth::user()->role === 'opj')
+                        <a href="{{ route('opj.index') }}" 
+                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('opj.*') ? 'bg-[#FEF4F0] text-[#F48C5B] border border-[#F48C5B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
+                            <i class="fa-solid fa-map-location-dot w-5 text-center {{ request()->routeIs('opj.*') ? 'text-[#F48C5B]' : 'text-gray-400' }}"></i>
+                            <span>Dashboard OPJ</span>
+                            @php $pendOpj = \App\Models\CustomerRegistration::where('status', 'submitted')->count(); @endphp
+                            @if($pendOpj > 0)
+                                <span class="ml-auto bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $pendOpj }}</span>
+                            @endif
+                        </a>
+                    @endif
 
-                @if(Auth::user()->role === 'admin_vas' || Auth::user()->role === 'c_care')
-                    <a href="{{ route('ccare.index') }}" 
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('ccare.*') ? 'bg-[#FEF4F0] text-[#EF666B] border border-[#EF666B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
-                        <i class="fa-solid fa-user-check w-5 text-center {{ request()->routeIs('ccare.*') ? 'text-[#EF666B]' : 'text-gray-400' }}"></i>
-                        <span>Dashboard C-Care</span>
-                        @php $pendCC = \App\Models\CustomerRegistration::where('status', 'filled')->count(); @endphp
-                        @if($pendCC > 0)
-                            <span class="ml-auto bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $pendCC }}</span>
-                        @endif
-                    </a>
-                @endif
+                    @if(Auth::user()->role === 'c_care')
+                        <a href="{{ route('ccare.index') }}" 
+                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('ccare.*') ? 'bg-[#FEF4F0] text-[#EF666B] border border-[#EF666B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
+                            <i class="fa-solid fa-user-check w-5 text-center {{ request()->routeIs('ccare.*') ? 'text-[#EF666B]' : 'text-gray-400' }}"></i>
+                            <span>Dashboard C-Care</span>
+                            @php $pendCC = \App\Models\CustomerRegistration::where('status', 'filled')->count(); @endphp
+                            @if($pendCC > 0)
+                                <span class="ml-auto bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ $pendCC }}</span>
+                            @endif
+                        </a>
+                    @endif
 
-                @if(Auth::user()->role === 'admin_vas' || Auth::user()->role === 'admin_sales')
-                    <a href="{{ route('admin-sales.dashboard') }}" 
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin-sales.*') ? 'bg-[#FEF4F0] text-[#9B385B] border border-[#9B385B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
-                        <i class="fa-solid fa-chart-line w-5 text-center {{ request()->routeIs('admin-sales.*') ? 'text-[#9B385B]' : 'text-gray-400' }}"></i>
-                        <span>Dashboard Admin Sales</span>
-                    </a>
+                    @if(Auth::user()->role === 'admin_sales')
+                        <a href="{{ route('admin-sales.dashboard') }}" 
+                           class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('admin-sales.*') ? 'bg-[#FEF4F0] text-[#9B385B] border border-[#9B385B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
+                            <i class="fa-solid fa-chart-line w-5 text-center {{ request()->routeIs('admin-sales.*') ? 'text-[#9B385B]' : 'text-gray-400' }}"></i>
+                            <span>Dashboard Admin Sales</span>
+                        </a>
+                    @endif
                 @endif
 
                 @if(Auth::user()->role === 'admin_vas')
-                    <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-4 pb-1">
+                    <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-3 pb-1">
                         Sistem &amp; Administrasi VAS
                     </div>
 
                     <a href="{{ route('vas.dashboard') }}" 
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('vas.dashboard') ? 'bg-[#FEF4F0] text-[#9B385B] border border-[#9B385B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
-                        <i class="fa-solid fa-gauge-high w-5 text-center {{ request()->routeIs('vas.dashboard') ? 'text-[#9B385B]' : 'text-gray-400' }}"></i>
-                        <span>Ringkasan Super Admin</span>
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('vas.dashboard*') ? 'bg-[#FEF4F0] text-[#9B385B] border border-[#9B385B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
+                        <i class="fa-solid fa-headset w-5 text-center {{ request()->routeIs('vas.dashboard*') ? 'text-[#9B385B]' : 'text-gray-400' }}"></i>
+                        <span>Dashboard</span>
                     </a>
 
                     <a href="{{ route('vas.users') }}" 

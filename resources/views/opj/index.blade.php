@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard OPJ - Verifikasi Survey')
-@section('header_title', 'Dashboard OPJ (Operations & Technical)')
-@section('header_subtitle', 'Verifikasi koordinat lokasi survey sales & coverage jangkauan ODP')
+@section('header_title', 'Dashboard OPJ')
+@section('header_subtitle', '')
 
 @section('content')
 <div class="space-y-6">
@@ -76,17 +76,17 @@
             
             <!-- Status Filter Tabs -->
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar">
-                <a href="{{ route('opj.index', ['status' => 'all', 'search' => $search, 'per_page' => $perPage]) }}" 
-                   class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'all' ? 'bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
-                    Semua ({{ $stats['total'] }})
-                </a>
                 <a href="{{ route('opj.index', ['status' => 'submitted', 'search' => $search, 'per_page' => $perPage]) }}" 
-                   class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'submitted' ? 'bg-[#F48C5B] text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
+                   class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'submitted' ? 'bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
                     Menunggu OPJ ({{ $stats['pending_opj'] }})
                 </a>
                 <a href="{{ route('opj.index', ['status' => 'verified', 'search' => $search, 'per_page' => $perPage]) }}" 
                    class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'verified' ? 'bg-blue-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
                     Terverifikasi ({{ $stats['verified'] }})
+                </a>
+                <a href="{{ route('opj.index', ['status' => 'all', 'search' => $search, 'per_page' => $perPage]) }}" 
+                   class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'all' ? 'bg-gray-800 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
+                    Semua ({{ $stats['total'] }})
                 </a>
             </div>
 

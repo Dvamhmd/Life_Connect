@@ -13,7 +13,7 @@ class OpjController extends Controller
 {
     public function index(Request $request)
     {
-        $status = $request->query('status', 'all');
+        $status = $request->query('status', 'submitted');
         $search = trim((string) $request->query('search', ''));
         $perPage = (int) $request->query('per_page', 10);
 

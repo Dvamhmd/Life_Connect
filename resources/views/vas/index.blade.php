@@ -70,21 +70,40 @@
             </div>
 
             <div class="space-y-3">
-                @foreach($recentRegistrations as $reg)
-                    <div class="p-3 rounded-2xl bg-[#F8F9FA] border border-gray-200 flex items-center justify-between gap-3 text-xs">
-                        <div class="min-w-0">
-                            <div class="font-extrabold text-[#2C2C2C] truncate">{{ $reg->customer_name }}</div>
-                            <div class="text-[10px] text-gray-500 font-mono">{{ $reg->registration_code }} • {{ $reg->sales_name }}</div>
+                @forelse($recentRegistrations as $reg)
+                    <div class="p-3.5 rounded-2xl bg-[#F8F9FA] border border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:border-[#F48C5B]/40 transition-colors">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-[#2C2C2C] truncate text-sm">{{ $reg->customer_name }}</span>
+                                @php $badge = $reg->status_badge; @endphp
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $badge['bg'] }}">
+                                    {{ $badge['label'] }}
+                                </span>
+                            </div>
+                            <div class="text-[11px] text-gray-500 font-mono mt-0.5">
+                                <span class="text-[#F48C5B] font-bold">{{ $reg->registration_code }}</span> • {{ $reg->sales_name }} ({{ $reg->sales_am_id }})
+                            </div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">
+                                {{ $reg->village ? $reg->village . ', ' . $reg->regency : '-' }} • {{ $reg->created_at->diffForHumans() }}
+                            </div>
                         </div>
-                        <div class="text-right flex-shrink-0">
-                            @php $badge = $reg->status_badge; @endphp
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $badge['bg'] }}">
-                                {{ $badge['label'] }}
-                            </span>
-                            <div class="text-[9px] text-gray-400 mt-0.5">{{ $reg->created_at->diffForHumans() }}</div>
+                        <div class="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
+                            <button type="button" 
+                                    onclick="openChangeStatusModal({{ $reg->id }}, '{{ addslashes($reg->customer_name) }}', '{{ $reg->registration_code }}', '{{ $reg->status }}')"
+                                    class="px-2.5 py-1.5 rounded-lg bg-[#FEF4F0] hover:bg-[#F6D8CE] text-[#9B385B] border border-[#F48C5B]/30 text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs">
+                                <i class="fa-solid fa-pen-to-square text-[#F48C5B]"></i>
+                                <span>Ubah Status</span>
+                            </button>
+                            <a href="{{ route('admin-sales.show', $reg->id) }}" 
+                               class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 text-xs font-bold transition-all inline-flex items-center gap-1">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-gray-400 text-[10px]"></i>
+                                <span>Detail</span>
+                            </a>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <div class="text-xs text-gray-400 italic text-center py-6">Belum ada data pendaftaran pelanggan.</div>
+                @endforelse
             </div>
         </div>
 
@@ -119,4 +138,123 @@
     </div>
 
 </div>
+
+<!-- Modal Ubah Status Pengajuan (Admin VAS) -->
+<div id="changeStatusModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-gray-100 animate-in fade-in zoom-in-95 duration-200">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-[#FEF4F0]">
+            <div class="flex items-center gap-2 font-extrabold text-sm text-[#9B385B]">
+                <i class="fa-solid fa-sliders text-[#F48C5B]"></i>
+                <span>Ubah Status Pengajuan (Admin VAS)</span>
+            </div>
+            <button type="button" onclick="closeChangeStatusModal()" class="text-gray-400 hover:text-gray-600 cursor-pointer">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
+        </div>
+
+        <form id="changeStatusForm" method="POST" action="">
+            @csrf
+            <div class="p-6 space-y-4 text-xs">
+                
+                <!-- Target Information -->
+                <div class="p-3.5 rounded-2xl bg-[#F8F9FA] border border-gray-200 space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 font-medium">Pelanggan:</span>
+                        <span id="modalCustomerName" class="font-extrabold text-[#2C2C2C] text-sm">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 font-medium">Kode Pendaftaran:</span>
+                        <span id="modalRegCode" class="font-mono font-bold text-[#F48C5B]">-</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 font-medium">Status Saat Ini:</span>
+                        <span id="modalCurrentStatus" class="font-bold text-gray-700 uppercase">-</span>
+                    </div>
+                </div>
+
+                <!-- Status Selector -->
+                <div>
+                    <label class="block font-bold text-[#333333] mb-1.5">Pilih Status Baru <span class="text-rose-500">*</span></label>
+                    <select name="status" id="modalStatusSelect" required onchange="handleModalStatusChange(this.value)"
+                            class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-300 text-xs font-bold text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#9B385B]">
+                        <option value="submitted">1. SUBMITTED (Survey Awal / Menunggu OPJ)</option>
+                        <option value="verified">2. VERIFIED (Terverifikasi OPJ / Menunggu Form Pelanggan)</option>
+                        <option value="filled">3. FILLED (Form Diisi Pelanggan / Menunggu C-Care)</option>
+                        <option value="approved">4. APPROVED (Disetujui / Selesai Closing)</option>
+                        <option value="revision">5. REVISION (Memerlukan Revisi Dokumen/Data)</option>
+                    </select>
+                </div>
+
+                <!-- Category field if Revision -->
+                <div id="modalRevisionCategoryBox" class="hidden space-y-1">
+                    <label class="block font-bold text-[#333333]">Kategori Revisi</label>
+                    <select name="rejection_category" id="modalRejectionCategory"
+                            class="w-full px-3.5 py-2 rounded-xl bg-white border border-gray-300 text-xs text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#9B385B]">
+                        <option value="Foto KTP Buram / Tidak Jelas">Foto KTP Buram / Tidak Jelas</option>
+                        <option value="NIK / Data Identitas Tidak Sesuai">NIK / Data Identitas Tidak Sesuai</option>
+                        <option value="Foto Rumah Tidak Jelas">Foto Rumah Tidak Jelas</option>
+                        <option value="Tanda Tangan Tidak Sesuai / Belum Ada">Tanda Tangan Tidak Sesuai / Belum Ada</option>
+                        <option value="Paket Berlangganan Perlu Penyesuaian">Paket Berlangganan Perlu Penyesuaian</option>
+                        <option value="Perubahan Status Manual oleh Admin VAS">Perubahan Status Manual oleh Admin VAS</option>
+                    </select>
+                </div>
+
+                <!-- Notes / Reason -->
+                <div>
+                    <label class="block font-bold text-[#333333] mb-1">Catatan / Alasan Perubahan Status</label>
+                    <textarea name="notes" id="modalStatusNotes" rows="3" placeholder="Tuliskan catatan perubahan status atau instruksi lanjutan (opsional)..."
+                              class="w-full px-3.5 py-2.5 rounded-xl bg-white border border-gray-300 text-xs text-[#2C2C2C] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#9B385B]"></textarea>
+                </div>
+
+                <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-[11px] flex items-start gap-2">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+                    <span>Tindakan ini dicatat dalam <strong>Audit Trail Log</strong> &amp; <strong>Tracking SLA</strong> sistem sebagai tindakan Super Admin VAS.</span>
+                </div>
+
+            </div>
+
+            <div class="px-6 py-4 border-t border-gray-100 bg-[#F8F9FA] flex justify-end gap-3">
+                <button type="button" onclick="closeChangeStatusModal()" class="px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200 cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] hover:from-[#EF666B] hover:to-[#F48C5B] text-white text-xs font-bold shadow-md shadow-orange-500/20 cursor-pointer">
+                    Simpan Perubahan Status
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function openChangeStatusModal(id, name, code, currentStatus) {
+        const form = document.getElementById('changeStatusForm');
+        form.action = "{{ url('/vas/registrations') }}/" + id + "/status";
+        
+        document.getElementById('modalCustomerName').textContent = name;
+        document.getElementById('modalRegCode').textContent = code;
+        document.getElementById('modalCurrentStatus').textContent = currentStatus;
+        
+        const statusSelect = document.getElementById('modalStatusSelect');
+        statusSelect.value = currentStatus;
+        handleModalStatusChange(currentStatus);
+        
+        document.getElementById('modalStatusNotes').value = '';
+        document.getElementById('changeStatusModal').classList.remove('hidden');
+    }
+
+    function closeChangeStatusModal() {
+        document.getElementById('changeStatusModal').classList.add('hidden');
+    }
+
+    function handleModalStatusChange(status) {
+        const catBox = document.getElementById('modalRevisionCategoryBox');
+        if (status === 'revision') {
+            catBox.classList.remove('hidden');
+        } else {
+            catBox.classList.add('hidden');
+        }
+    }
+</script>
+@endpush
 @endsection

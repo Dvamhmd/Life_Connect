@@ -70,12 +70,20 @@ Route::middleware(['auth'])->group(function () {
 
     // 4. Admin VAS Dashboard (Super Admin, Audit Logs, User Management)
     Route::prefix('vas')->name('vas.')->middleware('role:admin_vas')->group(function () {
-        Route::get('/', [AdminVasController::class, 'index'])->name('dashboard');
+        Route::get('/', function () {
+            return redirect()->route('vas.dashboard');
+        })->name('index');
+        Route::get('/dashboard', [AdminVasController::class, 'dashboard'])->name('dashboard');
+        Route::get('/ccare-dashboard', function () {
+            return redirect()->route('vas.dashboard');
+        });
+        Route::get('/overview', [AdminVasController::class, 'index'])->name('overview');
         Route::get('/audit-logs', [AdminVasController::class, 'auditLogs'])->name('audit-logs');
         Route::get('/users', [AdminVasController::class, 'users'])->name('users');
         Route::post('/users', [AdminVasController::class, 'storeUser'])->name('users.store');
         Route::put('/users/{id}', [AdminVasController::class, 'updateUser'])->name('users.update');
         Route::delete('/users/{id}', [AdminVasController::class, 'deleteUser'])->name('users.delete');
+        Route::post('/registrations/{id}/status', [AdminVasController::class, 'updateRegistrationStatus'])->name('registrations.update-status');
     });
 });
 

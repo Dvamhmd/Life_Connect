@@ -76,49 +76,55 @@
             <table class="w-full text-left text-xs">
                 <thead class="bg-[#F8F9FA] text-gray-600 font-bold uppercase tracking-wider border-b border-gray-200">
                     <tr>
-                        <th class="px-4 py-3.5">Waktu &amp; Tanggal</th>
-                        <th class="px-4 py-3.5">Pengguna &amp; Role</th>
-                        <th class="px-4 py-3.5">Aksi / Modul</th>
-                        <th class="px-5 py-3.5">Deskripsi Perubahan Data</th>
+                        <th class="px-4 py-2.5">Tanggal</th>
+                        <th class="px-4 py-2.5">Jam</th>
+                        <th class="px-4 py-2.5">Pengguna &amp; Role</th>
+                        <th class="px-5 py-2.5">Deskripsi Perubahan Data</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700">
                     @forelse($logs as $log)
                         <tr class="hover:bg-[#FEF4F0]/40 transition-colors">
                             
-                            <!-- Timestamp -->
-                            <td class="px-4 py-4 font-mono text-[11px] whitespace-nowrap">
-                                <div class="text-[#2C2C2C] font-bold">{{ $log->created_at->format('d M Y') }}</div>
-                                <div class="text-gray-400">{{ $log->created_at->format('H:i:s') }} ({{ $log->created_at->diffForHumans() }})</div>
+                            <!-- Tanggal -->
+                            <td class="px-4 py-2 whitespace-nowrap">
+                                <span class="text-[13px] font-extrabold text-[#2C2C2C]">{{ $log->created_at->format('d M Y') }}</span>
+                            </td>
+
+                            <!-- Jam -->
+                            <td class="px-4 py-2 font-mono whitespace-nowrap">
+                                <div class="text-[#2C2C2C] font-semibold text-[11px] leading-tight">{{ $log->created_at->format('H:i:s') }}</div>
+                                <div class="text-gray-400 text-[10px] leading-tight">{{ $log->created_at->diffForHumans() }}</div>
                             </td>
 
                             <!-- User & Role -->
-                            <td class="px-4 py-4">
-                                <div class="font-extrabold text-[#2C2C2C]">{{ $log->user_name ?: 'System' }}</div>
-                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-[#FEF4F0] text-[#9B385B] border border-[#F48C5B]/30 mt-0.5">
-                                    {{ ucfirst($log->user_role ?: 'System') }}
+                            <td class="px-4 py-2">
+                                @php
+                                    $roleRaw = strtolower($log->user_role ?? '');
+                                    if (in_array($roleRaw, ['c_care', 'c-care', 'ccare'])) {
+                                        $displayRole = 'C_care';
+                                    } elseif ($roleRaw === 'opj') {
+                                        $displayRole = 'Opj';
+                                    } elseif (in_array($roleRaw, ['guest', 'sales', 'system', ''])) {
+                                        $displayRole = 'Sales';
+                                    } elseif ($roleRaw === 'admin_vas' || $roleRaw === 'vas') {
+                                        $displayRole = 'Admin VAS';
+                                    } elseif ($roleRaw === 'admin_sales') {
+                                        $displayRole = 'Admin Sales';
+                                    } else {
+                                        $displayRole = ucfirst($log->user_role);
+                                    }
+                                @endphp
+                                <span class="inline-flex items-center justify-center w-20 px-2 py-0.5 rounded text-[11px] font-semibold bg-gray-100 text-gray-700 border border-gray-200">
+                                    {{ $displayRole }}
                                 </span>
-                            </td>
-
-                            <!-- Action & Module -->
-                            <td class="px-4 py-4">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold font-mono 
-                                    @if(str_contains($log->action, 'CREATE')) bg-emerald-50 text-emerald-800 border border-emerald-200
-                                    @elseif(str_contains($log->action, 'VERIFY')) bg-amber-50 text-amber-800 border border-amber-200
-                                    @elseif(str_contains($log->action, 'APPROVE')) bg-emerald-50 text-emerald-800 border border-emerald-200
-                                    @elseif(str_contains($log->action, 'REJECT') || str_contains($log->action, 'DELETE')) bg-rose-50 text-rose-800 border border-rose-200
-                                    @elseif(str_contains($log->action, 'UPDATE')) bg-blue-50 text-blue-800 border border-blue-200
-                                    @else bg-gray-100 text-gray-700 border border-gray-200 @endif">
-                                    {{ $log->action }}
-                                </span>
-                                <div class="text-[10px] text-gray-400 mt-1">Modul: <strong class="text-gray-600">{{ $log->module }}</strong></div>
                             </td>
 
                             <!-- Description -->
-                            <td class="px-5 py-4 max-w-md">
-                                <p class="text-[#2C2C2C] text-xs leading-relaxed font-medium">{{ $log->description }}</p>
+                            <td class="px-5 py-2 max-w-md">
+                                <p class="text-[#2C2C2C] text-xs leading-normal font-medium">{{ $log->description }}</p>
                                 @if($log->target_type)
-                                    <div class="text-[10px] text-gray-400 mt-1 font-mono">
+                                    <div class="text-[10px] text-gray-400 mt-0.5 font-mono">
                                         Target: {{ $log->target_type }} #{{ $log->target_id }}
                                     </div>
                                 @endif

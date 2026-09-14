@@ -193,7 +193,7 @@
                         <h3 class="font-bold text-[#2C2C2C] text-sm group-hover:text-[#EF666B] transition-colors">Admin &amp; VAS Master</h3>
                         <p class="text-xs text-gray-500 mt-1 leading-relaxed">Pemantauan SLA alur kerja, audit log forensik transaksi, dan manajemen pengguna terpusat.</p>
                     </div>
-                    <a href="{{ route('vas.index') }}" class="inline-flex items-center gap-1 text-xs font-bold text-[#EF666B] hover:text-[#9B385B] pt-1">
+                    <a href="{{ route('vas.dashboard') }}" class="inline-flex items-center gap-1 text-xs font-bold text-[#EF666B] hover:text-[#9B385B] pt-1">
                         <span>Portal VAS Admin</span>
                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                     </a>

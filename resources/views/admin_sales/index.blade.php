@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard Admin Sales - Tracking Progress & SLA')
-@section('header_title', 'Dashboard Admin Sales & Evaluasi Tim')
-@section('header_subtitle', 'Monitoring pergerakan pengajuan calon pelanggan, analisis bottleneck proses, dan performa Sales AM')
+@section('header_title', 'Dashboard Admin Sales')
+@section('header_subtitle', '')
 
 @section('content')
 <div class="space-y-6">
@@ -54,7 +54,7 @@
             <div>
                 <h3 class="text-sm font-extrabold text-[#2C2C2C] flex items-center gap-2">
                     <i class="fa-solid fa-stopwatch text-[#F48C5B]"></i>
-                    <span>Analisis SLA &amp; Evaluasi Kecepatan Proses (Bottleneck Tracking)</span>
+                    <span>Analisis &amp; Evaluasi Proses (Bottleneck Tracking)</span>
                 </h3>
                 <p class="text-xs text-gray-500">Rata-rata waktu yang dibutuhkan pada setiap tahapan untuk evaluasi tim</p>
             </div>
@@ -73,9 +73,13 @@
                 </div>
                 <div class="text-xl font-extrabold text-[#F48C5B]">
                     @if($avgOpjDuration)
-                        {{ round($avgOpjDuration / 3600, 1) }} <span class="text-xs font-normal text-gray-500">Jam rata-rata</span>
+                        @if($avgOpjDuration >= 3600)
+                            {{ round($avgOpjDuration / 3600, 1) }} <span class="text-xs font-normal text-gray-500">Jam rata-rata</span>
+                        @else
+                            {{ max(1, round($avgOpjDuration / 60)) }} <span class="text-xs font-normal text-gray-500">Menit rata-rata</span>
+                        @endif
                     @else
-                        <span class="text-gray-500 text-sm">~ 45 Menit</span>
+                        <span class="text-gray-400 text-sm font-semibold">Belum ada data</span>
                     @endif
                 </div>
                 <p class="text-[11px] text-gray-600 leading-relaxed">
@@ -91,9 +95,13 @@
                 </div>
                 <div class="text-xl font-extrabold text-[#EF666B]">
                     @if($avgCustFillDuration)
-                        {{ round($avgCustFillDuration / 3600, 1) }} <span class="text-xs font-normal text-gray-500">Jam rata-rata</span>
+                        @if($avgCustFillDuration >= 3600)
+                            {{ round($avgCustFillDuration / 3600, 1) }} <span class="text-xs font-normal text-gray-500">Jam rata-rata</span>
+                        @else
+                            {{ max(1, round($avgCustFillDuration / 60)) }} <span class="text-xs font-normal text-gray-500">Menit rata-rata</span>
+                        @endif
                     @else
-                        <span class="text-gray-500 text-sm">~ 3.2 Jam</span>
+                        <span class="text-gray-400 text-sm font-semibold">Belum ada data</span>
                     @endif
                 </div>
                 <p class="text-[11px] text-gray-600 leading-relaxed">
@@ -109,9 +117,13 @@
                 </div>
                 <div class="text-xl font-extrabold text-[#9B385B]">
                     @if($avgCCareDuration)
-                        {{ round($avgCCareDuration / 3600, 1) }} <span class="text-xs font-normal text-gray-500">Jam rata-rata</span>
+                        @if($avgCCareDuration >= 3600)
+                            {{ round($avgCCareDuration / 3600, 1) }} <span class="text-xs font-normal text-gray-500">Jam rata-rata</span>
+                        @else
+                            {{ max(1, round($avgCCareDuration / 60)) }} <span class="text-xs font-normal text-gray-500">Menit rata-rata</span>
+                        @endif
                     @else
-                        <span class="text-gray-500 text-sm">~ 1.5 Jam</span>
+                        <span class="text-gray-400 text-sm font-semibold">Belum ada data</span>
                     @endif
                 </div>
                 <p class="text-[11px] text-gray-600 leading-relaxed">
@@ -119,52 +131,6 @@
                 </p>
             </div>
 
-        </div>
-    </div>
-
-    <!-- Sales Leaderboard Performance Grid -->
-    <div class="rounded-3xl bg-white border border-gray-200 p-6 shadow-sm space-y-4">
-        <h3 class="text-sm font-extrabold text-[#2C2C2C] flex items-center gap-2">
-            <i class="fa-solid fa-trophy text-amber-500"></i>
-            <span>Performa Sales Account Manager (AM)</span>
-        </h3>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach($salesPerformance as $perf)
-                <div class="p-4 rounded-2xl bg-gray-50 border border-gray-200 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-8 h-8 rounded-lg bg-[#FEF4F0] border border-[#F48C5B]/30 text-[#F48C5B] flex items-center justify-center font-extrabold text-xs">
-                                {{ $perf['sales_id'] }}
-                            </div>
-                            <div>
-                                <div class="font-bold text-[#2C2C2C] text-xs">{{ $perf['name'] }}</div>
-                                <div class="text-[10px] text-gray-400">{{ $perf['sales_id'] }}</div>
-                            </div>
-                        </div>
-                        <span class="text-xs font-extrabold text-emerald-700">{{ $perf['conversion_rate'] }}% <span class="text-[10px] text-gray-400 font-normal">Conv</span></span>
-                    </div>
-
-                    <div class="grid grid-cols-4 gap-1 text-center text-[10px] pt-1 border-t border-gray-200">
-                        <div class="p-1.5 rounded bg-white border border-gray-200">
-                            <span class="text-gray-400 block">Total</span>
-                            <span class="font-bold text-[#2C2C2C]">{{ $perf['total'] }}</span>
-                        </div>
-                        <div class="p-1.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
-                            <span class="block">Approve</span>
-                            <span class="font-bold">{{ $perf['approved'] }}</span>
-                        </div>
-                        <div class="p-1.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
-                            <span class="block">Proses</span>
-                            <span class="font-bold">{{ $perf['pending'] }}</span>
-                        </div>
-                        <div class="p-1.5 rounded bg-rose-50 text-rose-800 border border-rose-200">
-                            <span class="block">Revisi</span>
-                            <span class="font-bold">{{ $perf['revision'] }}</span>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
         </div>
     </div>
 
@@ -248,8 +214,8 @@
                         <th class="px-4 py-3.5">Sales AM</th>
                         <th class="px-4 py-3.5">Wilayah</th>
                         <th class="px-4 py-3.5">Paket &amp; Nilai</th>
-                        <th class="px-5 py-3.5">Progress Workflow Pipeline</th>
-                        <th class="px-4 py-3.5 text-right">Aksi</th>
+                        <th class="px-5 py-3.5 text-center">Progress Workflow Pipeline</th>
+                        <th class="px-4 py-3.5 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700">
@@ -342,7 +308,7 @@
                             </td>
 
                             <!-- Action -->
-                            <td class="px-4 py-4 text-right whitespace-nowrap">
+                            <td class="px-4 py-4 text-center whitespace-nowrap">
                                 <a href="{{ route('admin-sales.show', $reg->id) }}" 
                                    class="px-3 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200 transition-colors inline-flex items-center gap-1">
                                     <i class="fa-solid fa-timeline text-[#F48C5B]"></i>

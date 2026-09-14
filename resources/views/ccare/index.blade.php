@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard C-Care - Verifikasi Berkas Pelanggan')
-@section('header_title', 'Dashboard Customer Care (C-Care)')
-@section('header_subtitle', 'Verifikasi kelengkapan dokumen KTP, foto rumah, tanda tangan digital, dan persetujuan berlangganan')
+@section('header_title', 'Dashboard Customer Care')
+@section('header_subtitle', '')
 
 @section('content')
 <div class="space-y-6">
@@ -66,7 +66,7 @@
             
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar">
                 <a href="{{ route('ccare.index', ['status' => 'filled', 'search' => $search, 'per_page' => $perPage]) }}" 
-                   class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'filled' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
+                   class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'filled' ? 'bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
                     <i class="fa-solid fa-file-signature mr-1"></i> Perlu Review C-Care ({{ $stats['needs_action'] }})
                 </a>
                 <a href="{{ route('ccare.index', ['status' => 'revision', 'search' => $search, 'per_page' => $perPage]) }}" 
@@ -78,7 +78,7 @@
                     Disetujui ({{ $stats['approved'] }})
                 </a>
                 <a href="{{ route('ccare.index', ['status' => 'all', 'search' => $search, 'per_page' => $perPage]) }}" 
-                   class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'all' ? 'bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
+                   class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'all' ? 'bg-gray-800 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
                     Semua Berkas ({{ $stats['total'] }})
                 </a>
             </div>
@@ -129,13 +129,13 @@
             <table class="w-full text-left text-xs">
                 <thead class="bg-[#F8F9FA] text-gray-600 font-bold uppercase tracking-wider border-b border-gray-200">
                     <tr>
-                        <th class="px-5 py-3.5">Kode &amp; Nama Pelanggan</th>
-                        <th class="px-4 py-3.5">NIK &amp; Kontak</th>
-                        <th class="px-4 py-3.5">Paket Dipilih</th>
-                        <th class="px-4 py-3.5">Metode Billing</th>
-                        <th class="px-4 py-3.5">Sales AM</th>
-                        <th class="px-4 py-3.5">Status</th>
-                        <th class="px-5 py-3.5 text-right">Aksi C-Care</th>
+                        <th class="px-5 py-2.5">Kode &amp; Nama Pelanggan</th>
+                        <th class="px-4 py-2.5">NIK &amp; Kontak</th>
+                        <th class="px-4 py-2.5">Paket Dipilih</th>
+                        <th class="px-4 py-2.5">Metode Billing</th>
+                        <th class="px-4 py-2.5">Sales AM</th>
+                        <th class="px-4 py-2.5 text-center">Status</th>
+                        <th class="px-5 py-2.5 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700">
@@ -143,20 +143,17 @@
                         <tr class="hover:bg-[#FEF4F0]/40 transition-colors {{ $reg->status === 'filled' ? 'bg-indigo-50/40' : ($reg->status === 'revision' ? 'bg-rose-50/40' : '') }}">
                             
                             <!-- Customer Info -->
-                            <td class="px-5 py-4">
-                                <div class="font-extrabold text-[#2C2C2C] text-sm">
+                            <td class="px-5 py-2.5">
+                                <div class="font-extrabold text-[#2C2C2C] text-sm leading-tight">
                                     {{ $reg->customer_name }}
                                 </div>
                                 <div class="font-mono text-[11px] font-bold text-[#F48C5B] mt-0.5">
                                     {{ $reg->registration_code }}
                                 </div>
-                                <div class="text-[10px] text-gray-400 mt-0.5">
-                                    Diisi: {{ $reg->filled_at ? $reg->filled_at->format('d M Y, H:i') : ($reg->submitted_at ? $reg->submitted_at->format('d M Y, H:i') : '-') }}
-                                </div>
                             </td>
 
                             <!-- NIK & Contact -->
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-2.5">
                                 @if($reg->nik)
                                     <div class="font-mono font-bold text-gray-800">{{ $reg->nik }}</div>
                                 @else
@@ -168,29 +165,29 @@
                             </td>
 
                             <!-- Package -->
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-2.5">
                                 @if($reg->package)
-                                    <div class="font-extrabold text-[#9B385B]">{{ $reg->package->name }}</div>
-                                    <div class="text-[11px] font-bold text-[#F48C5B]">{{ $reg->package->formatted_price }} / bln</div>
+                                    <div class="font-extrabold text-[#9B385B] leading-tight">{{ $reg->package->name }}</div>
+                                    <div class="text-[11px] font-bold text-[#F48C5B] mt-0.5">{{ $reg->package->formatted_price }} / bln</div>
                                 @else
                                     <span class="text-gray-400 italic text-[11px]">-</span>
                                 @endif
                             </td>
 
                             <!-- Billing -->
-                            <td class="px-4 py-4">
-                                <div class="font-bold text-gray-800">{{ $reg->billing_method ?: '-' }}</div>
-                                <div class="text-[11px] text-gray-500">{{ $reg->billing_email ?: $reg->email }}</div>
+                            <td class="px-4 py-2.5">
+                                <div class="font-bold text-gray-800 leading-tight">{{ $reg->billing_method ?: '-' }}</div>
+                                <div class="text-[11px] text-gray-500 mt-0.5">{{ $reg->billing_email ?: $reg->email }}</div>
                             </td>
 
                             <!-- Sales -->
-                            <td class="px-4 py-4">
-                                <div class="font-bold text-[#2C2C2C]">{{ $reg->sales_name }}</div>
-                                <span class="text-[10px] text-[#9B385B] font-mono font-bold">{{ $reg->sales_am_id }}</span>
+                            <td class="px-4 py-2.5">
+                                <div class="font-bold text-[#2C2C2C] leading-tight">{{ $reg->sales_name }}</div>
+                                <span class="text-[10px] text-[#9B385B] font-mono font-bold mt-0.5 inline-block">{{ $reg->sales_am_id }}</span>
                             </td>
 
                             <!-- Status Badge -->
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-2.5 text-center">
                                 @php $badge = $reg->status_badge; @endphp
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border {{ $badge['bg'] }}">
                                     @if($reg->status === 'filled')
@@ -201,7 +198,7 @@
                             </td>
 
                             <!-- Actions -->
-                            <td class="px-5 py-4 text-right whitespace-nowrap">
+                            <td class="px-5 py-2.5 text-center whitespace-nowrap">
                                 <a href="{{ route('ccare.show', $reg->id) }}" 
                                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 {{ $reg->status === 'filled' ? 'bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] hover:from-[#EF666B] hover:to-[#F48C5B] text-white shadow-md shadow-orange-500/20' : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200' }}">
                                     <i class="fa-solid {{ $reg->status === 'filled' ? 'fa-user-check' : 'fa-eye' }}"></i>
