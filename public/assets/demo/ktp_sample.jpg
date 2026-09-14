@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+  <defs>
+    <linearGradient id="ktpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="100%" stop-color="#0369a1" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="380" rx="16" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+  <rect x="0" y="0" width="600" height="70" rx="16" fill="url(#ktpGrad)"/>
+  <text x="300" y="32" fill="#ffffff" font-family="sans-serif" font-size="16" font-weight="bold" text-anchor="middle">REPUBLIK INDONESIA</text>
+  <text x="300" y="54" fill="#e0f2fe" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">PROVINSI DAERAH ISTIMEWA YOGYAKARTA</text>
+  
+  <text x="40" y="110" fill="#0f172a" font-family="monospace" font-size="18" font-weight="bold">NIK : 3471011504890003</text>
+  
+  <text x="40" y="145" fill="#475569" font-family="sans-serif" font-size="13">Nama</text>
+  <text x="180" y="145" fill="#0f172a" font-family="sans-serif" font-size="13" font-weight="bold">: HENDRO PRASETYO</text>
+  
+  <text x="40" y="175" fill="#475569" font-family="sans-serif" font-size="13">Tempat/Tgl Lahir</text>
+  <text x="180" y="175" fill="#0f172a" font-family="sans-serif" font-size="13">: YOGYAKARTA, 15-04-1989</text>
+  
+  <text x="40" y="205" fill="#475569" font-family="sans-serif" font-size="13">Jenis Kelamin</text>
+  <text x="180" y="205" fill="#0f172a" font-family="sans-serif" font-size="13">: LAKI-LAKI</text>
+  
+  <text x="40" y="235" fill="#475569" font-family="sans-serif" font-size="13">Alamat</text>
+  <text x="180" y="235" fill="#0f172a" font-family="sans-serif" font-size="13">: JL. I DEWA NYOMAN OKA NO. 8</text>
+  
+  <text x="60" y="260" fill="#475569" font-family="sans-serif" font-size="12">RT/RW</text>
+  <text x="180" y="260" fill="#0f172a" font-family="sans-serif" font-size="12">: 003 / 007</text>
+  
+  <text x="60" y="285" fill="#475569" font-family="sans-serif" font-size="12">Kel/Desa</text>
+  <text x="180" y="285" fill="#0f172a" font-family="sans-serif" font-size="12">: KOTABARU</text>
+  
+  <text x="60" y="310" fill="#475569" font-family="sans-serif" font-size="12">Kecamatan</text>
+  <text x="180" y="310" fill="#0f172a" font-family="sans-serif" font-size="12">: GONDOKUSUMAN</text>
+
+  <!-- Photo Box -->
+  <rect x="440" y="100" width="120" height="160" rx="8" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="500" cy="150" r="30" fill="#3b82f6" fill-opacity="0.3"/>
+  <path d="M470 230 C470 190, 530 190, 530 230 Z" fill="#3b82f6" fill-opacity="0.4"/>
+  <text x="500" y="280" fill="#64748b" font-family="sans-serif" font-size="10" text-anchor="middle">PAS FOTO RESMI</text>
+  <rect x="440" y="310" width="120" height="30" rx="4" fill="#ecfdf5" stroke="#10b981"/>
+  <text x="500" y="329" fill="#047857" font-family="sans-serif" font-size="11" font-weight="bold" text-anchor="middle">DOKUMEN VALID</text>
+</svg>

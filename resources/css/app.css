@@ -1,0 +1,73 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+
+:root {
+    --color-sunset: #F48C5B;
+    --color-coral: #EF666B;
+    --color-plum: #9B385B;
+    --color-charcoal: #333333;
+    --color-charcoal-dark: #2C2C2C;
+    --color-soft-peach: #FEF4F0;
+    --color-light-grey: #F8F9FA;
+    --color-light-border: #E5E7EB;
+}
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --color-brand-sunset: #F48C5B;
+    --color-brand-coral: #EF666B;
+    --color-brand-plum: #9B385B;
+    --color-brand-charcoal: #333333;
+    --color-brand-charcoal-dark: #2C2C2C;
+    --color-brand-peach: #FEF4F0;
+    --color-brand-light-grey: #F8F9FA;
+}
+
+/* Light Glassmorphism and Card Styling */
+.glass-card {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(240, 230, 226, 0.8);
+    box-shadow: 0 4px 20px -2px rgba(155, 56, 91, 0.05);
+}
+
+.glass-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid #E5E7EB;
+}
+
+/* Custom Light Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #F1F5F9;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
+
+/* Logo Gradient Background Utility */
+.bg-brand-gradient {
+    background: linear-gradient(135deg, #F48C5B 0%, #EF666B 50%, #9B385B 100%);
+}
+
+.bg-brand-gradient-hover:hover {
+    background: linear-gradient(135deg, #EF666B 0%, #F48C5B 100%);
+}
+
+.text-brand-gradient {
+    background: linear-gradient(135deg, #F48C5B 0%, #EF666B 50%, #9B385B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
