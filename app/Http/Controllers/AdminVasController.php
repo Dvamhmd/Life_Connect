@@ -84,18 +84,26 @@ class AdminVasController extends Controller
             ->withQueryString();
 
         // Cache distinct modules and actions to eliminate full table scans on every pagination request
-        $modules = Cache::remember('audit_logs_distinct_modules', 300, function () {
+        $modules = Cache::remember('audit_logs_distinct_modules_v2', 300, function () {
             return AuditLog::whereNotIn('action', ['LOGIN', 'LOGOUT'])
-                ->select('module')
+                ->whereNotNull('module')
                 ->distinct()
-                ->pluck('module');
+                ->pluck('module')
+                ->map(fn($item) => is_array($item) ? ($item['module'] ?? reset($item)) : (is_object($item) ? ($item->module ?? '') : (string) $item))
+                ->filter()
+                ->unique()
+                ->values();
         });
 
-        $actions = Cache::remember('audit_logs_distinct_actions', 300, function () {
+        $actions = Cache::remember('audit_logs_distinct_actions_v2', 300, function () {
             return AuditLog::whereNotIn('action', ['LOGIN', 'LOGOUT'])
-                ->select('action')
+                ->whereNotNull('action')
                 ->distinct()
-                ->pluck('action');
+                ->pluck('action')
+                ->map(fn($item) => is_array($item) ? ($item['action'] ?? reset($item)) : (is_object($item) ? ($item->action ?? '') : (string) $item))
+                ->filter()
+                ->unique()
+                ->values();
         });
 
         return view('vas.audit_logs', compact('logs', 'modules', 'actions', 'module', 'action', 'search', 'perPage'));
