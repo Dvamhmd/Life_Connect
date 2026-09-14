@@ -267,10 +267,10 @@
 
                             <!-- Actions -->
                             <td class="px-5 py-2.5 text-center whitespace-nowrap">
-                                <a href="{{ route('ccare.show', $reg->id) }}" 
-                                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 {{ $reg->status === 'filled' ? 'bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] hover:from-[#EF666B] hover:to-[#F48C5B] text-white shadow-md shadow-orange-500/20' : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-200' }}">
-                                    <i class="fa-solid {{ $reg->status === 'filled' ? 'fa-user-check' : 'fa-eye' }}"></i>
-                                    <span>{{ $reg->status === 'filled' ? 'Review &amp; Verifikasi' : 'Lihat Detail' }}</span>
+                                <a href="{{ route('vas.registrations.show', $reg->id) }}" 
+                                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all inline-flex items-center gap-1.5 bg-[#FEF4F0] hover:bg-[#F48C5B] text-[#9B385B] hover:text-white border border-[#F48C5B]/30 hover:border-[#F48C5B] shadow-2xs">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span>Lihat Detail</span>
                                 </a>
                             </td>
 

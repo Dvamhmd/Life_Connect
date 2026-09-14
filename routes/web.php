@@ -83,6 +83,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/users', [AdminVasController::class, 'storeUser'])->name('users.store');
         Route::put('/users/{id}', [AdminVasController::class, 'updateUser'])->name('users.update');
         Route::delete('/users/{id}', [AdminVasController::class, 'deleteUser'])->name('users.delete');
+        Route::get('/registrations/{id}', [AdminVasController::class, 'showRegistration'])->name('registrations.show');
         Route::post('/registrations/{id}/status', [AdminVasController::class, 'updateRegistrationStatus'])->name('registrations.update-status');
     });
 });

@@ -246,8 +246,8 @@
                     </div>
 
                     <a href="{{ route('vas.dashboard') }}" 
-                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('vas.dashboard*') ? 'bg-[#FEF4F0] text-[#9B385B] border border-[#9B385B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
-                        <i class="fa-solid fa-headset w-5 text-center {{ request()->routeIs('vas.dashboard*') ? 'text-[#9B385B]' : 'text-gray-400' }}"></i>
+                       class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ request()->routeIs('vas.dashboard*', 'vas.registrations.*') ? 'bg-[#FEF4F0] text-[#9B385B] border border-[#9B385B]/40 shadow-xs' : 'text-gray-600 hover:bg-gray-100 hover:text-[#2C2C2C]' }}">
+                        <i class="fa-solid fa-headset w-5 text-center {{ request()->routeIs('vas.dashboard*', 'vas.registrations.*') ? 'text-[#9B385B]' : 'text-gray-400' }}"></i>
                         <span>Dashboard</span>
                     </a>
 

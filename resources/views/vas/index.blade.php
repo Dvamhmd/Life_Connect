@@ -94,7 +94,7 @@
                                 <i class="fa-solid fa-pen-to-square text-[#F48C5B]"></i>
                                 <span>Ubah Status</span>
                             </button>
-                            <a href="{{ route('admin-sales.show', $reg->id) }}" 
+                            <a href="{{ route('vas.registrations.show', $reg->id) }}" 
                                class="px-2.5 py-1.5 rounded-lg bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 text-xs font-bold transition-all inline-flex items-center gap-1">
                                 <i class="fa-solid fa-arrow-up-right-from-square text-gray-400 text-[10px]"></i>
                                 <span>Detail</span>

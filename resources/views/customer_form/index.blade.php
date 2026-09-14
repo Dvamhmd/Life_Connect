@@ -209,6 +209,7 @@
         <!-- Public Registration Multi-Step Form -->
         <form action="{{ route('customer-form.submit', $registration->token) }}" method="POST" enctype="multipart/form-data" id="customerRegistrationForm" class="space-y-6 sm:space-y-8" novalidate>
             @csrf
+            <input type="hidden" name="package_id" id="package_id" value="{{ old('package_id', $registration->package_id) }}">
 
             <!-- STEP 1: DATA PRIBADI -->
             <div id="step-1" class="step-pane transition-all duration-300">
@@ -492,11 +493,16 @@
                                                    class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
                                             <select name="services[internet][text1]" id="net_text1"
                                                     class="w-0 min-w-0 flex-1 px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors cursor-pointer truncate">
-                                                <option value="" {{ empty($netText1) ? 'selected' : '' }}>-- Pilih Paket Internet --</option>
-                                                <option value="izzi life 30 - Rp 166.500/bulan" {{ $netText1 == 'izzi life 30 - Rp 166.500/bulan' ? 'selected' : '' }}>izzi life 30 - Rp 166.500/bulan</option>
-                                                <option value="izzi life 50 - Rp 277.500/bulan" {{ $netText1 == 'izzi life 50 - Rp 277.500/bulan' ? 'selected' : '' }}>izzi life 50 - Rp 277.500/bulan</option>
-                                                <option value="izzi life 100 - Rp 388.500/bulan" {{ $netText1 == 'izzi life 100 - Rp 388.500/bulan' ? 'selected' : '' }}>izzi life 100 - Rp 388.500/bulan</option>
-                                                <option value="izzi life 200 - Rp 666.000/bulan" {{ $netText1 == 'izzi life 200 - Rp 666.000/bulan' ? 'selected' : '' }}>izzi life 200 - Rp 666.000/bulan</option>
+                                                <option value="" data-package-id="" {{ empty($netText1) && empty($registration->package_id) ? 'selected' : '' }}>-- Pilih Paket Internet --</option>
+                                                @foreach($packages as $pkg)
+                                                    @php
+                                                        $optVal = $pkg->name . ' (' . $pkg->speed . ') - ' . $pkg->formatted_price . '/bulan';
+                                                        $isPkgSel = (old('package_id', $registration->package_id) == $pkg->id) || ($netText1 == $optVal) || (str_contains(strtolower($netText1), strtolower($pkg->name))) || (str_contains($netText1, $pkg->speed));
+                                                    @endphp
+                                                    <option value="{{ $optVal }}" data-package-id="{{ $pkg->id }}" {{ $isPkgSel ? 'selected' : '' }}>
+                                                        {{ $pkg->name }} ({{ $pkg->speed }}) - {{ $pkg->formatted_price }}/bulan
+                                                    </option>
+                                                @endforeach
                                             </select>
                                         </div>
 
@@ -507,10 +513,15 @@
                                             <select name="services[internet][text2]" id="net_text2"
                                                     class="w-0 min-w-0 flex-1 px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors cursor-pointer truncate">
                                                 <option value="" {{ empty($netText2) ? 'selected' : '' }}>-- Pilih Paket Tambahan --</option>
-                                                <option value="izzi life 30 - Rp 166.500/bulan" {{ $netText2 == 'izzi life 30 - Rp 166.500/bulan' ? 'selected' : '' }}>izzi life 30 - Rp 166.500/bulan</option>
-                                                <option value="izzi life 50 - Rp 277.500/bulan" {{ $netText2 == 'izzi life 50 - Rp 277.500/bulan' ? 'selected' : '' }}>izzi life 50 - Rp 277.500/bulan</option>
-                                                <option value="izzi life 100 - Rp 388.500/bulan" {{ $netText2 == 'izzi life 100 - Rp 388.500/bulan' ? 'selected' : '' }}>izzi life 100 - Rp 388.500/bulan</option>
-                                                <option value="izzi life 200 - Rp 666.000/bulan" {{ $netText2 == 'izzi life 200 - Rp 666.000/bulan' ? 'selected' : '' }}>izzi life 200 - Rp 666.000/bulan</option>
+                                                @foreach($packages as $pkg)
+                                                    @php
+                                                        $optVal2 = $pkg->name . ' (' . $pkg->speed . ') - ' . $pkg->formatted_price . '/bulan';
+                                                        $isPkgSel2 = ($netText2 == $optVal2) || (str_contains(strtolower($netText2), strtolower($pkg->name)));
+                                                    @endphp
+                                                    <option value="{{ $optVal2 }}" {{ $isPkgSel2 ? 'selected' : '' }}>
+                                                        {{ $pkg->name }} ({{ $pkg->speed }}) - {{ $pkg->formatted_price }}/bulan
+                                                    </option>
+                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
@@ -1991,6 +2002,14 @@
                         p.text.addEventListener(evt, () => {
                             if (p.cb && p.text.value.trim() !== '') {
                                 p.cb.checked = true;
+                            }
+                            if (p.text.id === 'net_text1') {
+                                const selectedOpt = p.text.options ? p.text.options[p.text.selectedIndex] : null;
+                                const pkgId = selectedOpt ? selectedOpt.getAttribute('data-package-id') : '';
+                                const pkgIdInput = document.getElementById('package_id');
+                                if (pkgIdInput && pkgId) {
+                                    pkgIdInput.value = pkgId;
+                                }
                             }
                             validateSingleField('services_selected', true);
                             refreshButtonStates();

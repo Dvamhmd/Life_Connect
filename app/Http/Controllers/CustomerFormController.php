@@ -142,8 +142,31 @@ class CustomerFormController extends Controller
         ];
 
         $packageId = $request->package_id ?: $registration->package_id;
+
+        // Auto-match package if package_id was not directly provided
+        if (!$packageId) {
+            $netText = trim((string) $request->input('services.internet.text1', ''));
+            if ($netText !== '') {
+                $allPackages = SubscriptionPackage::where('is_active', true)->get();
+                foreach ($allPackages as $p) {
+                    if (str_contains(strtolower($netText), strtolower($p->name)) || 
+                        str_contains(strtolower($netText), strtolower($p->speed)) ||
+                        str_contains(strtolower($netText), (string) $p->id)) {
+                        $packageId = $p->id;
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Fallback: If still no package_id, pick the first active package
+        if (!$packageId) {
+            $defaultPkg = SubscriptionPackage::where('is_popular', true)->first() ?? SubscriptionPackage::first();
+            $packageId = $defaultPkg?->id;
+        }
+
         $package = $packageId ? SubscriptionPackage::find($packageId) : null;
-        $packageName = $package ? $package->name : 'Layanan Custom LifeMedia';
+        $packageName = $package ? $package->name : 'Life Fiber';
 
         $durationSeconds = $registration->verified_at ? max(0, abs((int) round($now->diffInSeconds($registration->verified_at)))) : null;
 

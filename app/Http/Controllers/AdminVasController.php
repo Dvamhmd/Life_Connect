@@ -165,6 +165,13 @@ class AdminVasController extends Controller
         return $this->dashboard($request);
     }
 
+    public function showRegistration($id)
+    {
+        $registration = CustomerRegistration::with(['package', 'sales', 'progressLogs'])->findOrFail($id);
+
+        return view('vas.show', compact('registration'));
+    }
+
     public function auditLogs(Request $request)
     {
         $module = $request->query('module', 'all');

@@ -1,58 +1,226 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🌐 Life Connect - Customer Registration & Service Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem manajemen terintegrasi untuk alur pendaftaran pelanggan internet LifeMedia, mulai dari pengisian form registrasi publik, penanganan survey teknis oleh tim OPJ, verifikasi data oleh tim Customer Care (C-Care), hingga approval dan monitoring oleh Admin Sales & Admin VAS.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📌 Fitur Utama & Peran Pengguna (Roles)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. **Form Registrasi Pelanggan Publik**: Pengisian formulir pendaftaran pelanggan baru lengkap dengan pemilihan paket langganan dan upload berkas.
+2. **Sales / Account Manager (AM)**: Pengajuan permohonan survey, tracking status prospek pelanggan, dan pemantauan pendaftaran.
+3. **Tim OPJ (Operasi & Jaringan)**: Verifikasi teknis lapangan (ODP/FAT, redaman sinyal, kebutuhan kabel & tiang) serta rekomendasi kelayakan instalasi.
+4. **Customer Care (C-Care)**: Verifikasi kelengkapan dokumen KTP/KK, validasi data pelanggan, dan konfirmasi penagihan awal.
+5. **Admin Sales**: Approval pengajuan survey & pendaftaran, monitoring performa tim sales, serta rekap laporan.
+6. **Admin VAS (Value Added Services)**: Monitoring aktivasi layanan tambahan, dashboard analitik pelanggan, dan log aktivitas.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 📋 Prasyarat Sistem (Prerequisites)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Pastikan sistem/komputer Anda telah terinstall tools berikut:
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **PHP**: Versi `^8.3` atau lebih baru
+  - *PHP Extensions*: `OpenSSL`, `PDO`, `pdo_sqlite` (atau `pdo_mysql`), `Mbstring`, `Tokenizer`, `XML`, `Ctype`, `JSON`, `BCMath`, `Fileinfo`, `GD` / `Imagick`
+- **Composer**: Versi `2.x`
+- **Node.js**: Versi `18.x` / `20.x` atau lebih baru
+- **NPM**: Versi `9.x` atau lebih baru
+- **Git**: Untuk clone repository
+- **Database**: SQLite (default & praktis) atau MySQL / MariaDB
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+---
 
-## Agentic Development
+## 🚀 Panduan Instalasi Step-by-Step (Local Development)
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+Ikuti langkah-langkah berikut secara berurutan untuk menjalankan project di komputer lokal:
+
+### 1. Clone Repository
+
+Buka terminal / Git Bash / Command Prompt, lalu jalankan:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/Dvamhmd/Life_Connect.git
+cd Life_Connect
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+### 2. Install Dependensi PHP (Composer)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Jalankan composer untuk mengunduh semua library backend:
 
-## Code of Conduct
+```bash
+composer install
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+---
 
-## Security Vulnerabilities
+### 3. Install Dependensi JavaScript (NPM)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Jalankan npm untuk mengunduh dependensi frontend (Tailwind CSS, Vite, dll):
 
-## License
+```bash
+npm install
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+### 4. Konfigurasi File Environment (`.env`)
+
+Salin file template `.env.example` menjadi `.env`:
+
+**Linux / macOS / Git Bash:**
+```bash
+cp .env.example .env
+```
+
+**Windows PowerShell:**
+```powershell
+Copy-Item .env.example .env
+```
+
+**Windows Command Prompt (CMD):**
+```cmd
+copy .env.example .env
+```
+
+---
+
+### 5. Generate Application Encryption Key
+
+Generate key keamanan aplikasi Laravel:
+
+```bash
+php artisan key:generate
+```
+
+---
+
+### 6. Konfigurasi & Migrasi Database
+
+Project ini secara default siap menggunakan **SQLite** (tanpa perlu install database server tambahan), atau Anda dapat menggunakan **MySQL**.
+
+#### Opsi A: Menggunakan SQLite (Rekomendasi Cepat & Praktis)
+
+1. Pastikan konfigurasi di `.env` berisi:
+   ```env
+   DB_CONNECTION=sqlite
+   ```
+2. Buat file database SQLite jika belum ada:
+   - **Linux / macOS / Git Bash**: `touch database/database.sqlite`
+   - **Windows PowerShell**: `New-Item -ItemType File -Path database/database.sqlite -Force`
+   - **Windows CMD**: `type nul > database\database.sqlite`
+
+3. Jalankan migrasi dan seeder data awal:
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+
+#### Opsi B: Menggunakan MySQL / MariaDB
+
+1. Buat database baru di MySQL (misal bernama `life_connect`).
+2. Sesuaikan konfigurasi di file `.env`:
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=life_connect
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
+3. Jalankan migrasi dan seeder:
+   ```bash
+   php artisan migrate:fresh --seed
+   ```
+
+---
+
+### 7. Buat Symbolic Link Storage (Untuk Upload Dokumen/Foto)
+
+Buat link dari `public/storage` ke `storage/app/public` agar foto KTP, bukti survey, dan dokumen pelanggan dapat diakses:
+
+```bash
+php artisan storage:link
+```
+
+---
+
+### 8. Jalankan Asset Bundling (Frontend)
+
+Untuk meng-compile Tailwind CSS dan JavaScript:
+
+- **Mode Development (Hot-Reloading):**
+  ```bash
+  npm run dev
+  ```
+- **Atau Mode Production Build:**
+  ```bash
+  npm run build
+  ```
+
+---
+
+### 9. Jalankan Web Server Laravel
+
+Buka tab terminal baru, lalu jalankan server lokal:
+
+```bash
+php artisan serve
+```
+
+Aplikasi sekarang dapat diakses melalui browser di:
+👉 **[http://localhost:8000](http://localhost:8000)** atau **[http://127.0.0.1:8000](http://127.0.0.1:8000)**
+
+---
+
+## 🔑 Akun Demo / Akun Default (Hasil Seeder)
+
+Setelah menjalankan `php artisan migrate:fresh --seed`, Anda dapat langsung login menggunakan akun-akun berikut:
+
+> **Password untuk semua akun:** `password`
+
+| Role / Divisi | Email Login | Password | Keterangan / Hak Akses |
+| :--- | :--- | :--- | :--- |
+| **Admin VAS** | `vas@lifemedia.id` | `password` | Akses penuh dashboard VAS, status, dan log |
+| **Admin Sales** | `salesadmin@lifemedia.id` | `password` | Monitoring & approval sales seluruh area |
+| **Tim OPJ** | `opj@lifemedia.id` | `password` | Verifikasi teknis, ODP, tiang, redaman sinyal |
+| **Customer Care** | `ccare@lifemedia.id` | `password` | Verifikasi data pelanggan & penagihan |
+| **Sales (AM-101)** | `sales01@lifemedia.id` | `password` | Budi Pratama (Input survey & prospek) |
+| **Sales (AM-102)** | `sales02@lifemedia.id` | `password` | Dewi Lestari (Input survey & prospek) |
+
+---
+
+## 🧪 Menjalankan Testing
+
+Untuk memastikan semua fitur dan logic berjalan normal:
+
+```bash
+php artisan test
+```
+
+---
+
+## 🛠️ Tips & Solusi Masalah Umum (Troubleshooting)
+
+1. **Gambar / File Upload Tidak Muncul (404 Not Found):**
+   Pastikan sudah menjalankan `php artisan storage:link`. Jika di Windows link sempat rusak, hapus folder `public/storage` lalu jalankan ulang perintahnya.
+
+2. **Perubahan Tampilan / CSS Tidak Muncul:**
+   Pastikan `npm run dev` sedang aktif di terminal terpisah, atau jalankan `npm run build`.
+
+3. **Cache Error / Route Not Found:**
+   Bersihkan seluruh cache aplikasi dengan perintah:
+   ```bash
+   php artisan optimize:clear
+   ```
+
+4. **Izin Folder (Linux / macOS):**
+   Pastikan folder `storage` dan `bootstrap/cache` dapat ditulis:
+   ```bash
+   chmod -R 775 storage bootstrap/cache
+   ```
+
+---
+
+## 📄 Lisensi
+
+Project ini dikembangkan untuk kebutuhan internal LifeMedia.
