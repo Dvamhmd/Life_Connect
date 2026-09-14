@@ -14,9 +14,33 @@ class CCareController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status', 'filled');
-        $search = $request->query('search');
+        $search = trim((string) $request->query('search', ''));
+        $perPage = (int) $request->query('per_page', 10);
 
-        $query = CustomerRegistration::with(['sales', 'package']);
+        if (!in_array($perPage, [10, 25, 50, 100], true)) {
+            $perPage = 10;
+        }
+
+        // Selective column projection and lightweight package eager loading (excluding unused sales relation)
+        $query = CustomerRegistration::query()
+            ->select([
+                'id',
+                'registration_code',
+                'customer_name',
+                'nik',
+                'phone_wa',
+                'email',
+                'package_id',
+                'billing_method',
+                'billing_email',
+                'sales_name',
+                'sales_am_id',
+                'status',
+                'submitted_at',
+                'filled_at',
+                'updated_at',
+            ])
+            ->with(['package:id,name,price']);
 
         if ($status === 'filled') {
             $query->where('status', 'filled');
@@ -31,7 +55,7 @@ class CCareController extends Controller
             $status = 'filled';
         }
 
-        if ($search) {
+        if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
                   ->orWhere('registration_code', 'like', "%{$search}%")
@@ -41,16 +65,31 @@ class CCareController extends Controller
             });
         }
 
-        $registrations = $query->latest('filled_at')->latest('updated_at')->paginate(10)->withQueryString();
+        // Fast index-optimized pagination
+        $registrations = $query->orderBy('filled_at', 'desc')
+            ->orderBy('updated_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        // Single aggregation query for KPI metrics (1 database round-trip vs 4 round-trips)
+        $rawStats = CustomerRegistration::query()
+            ->selectRaw("
+                SUM(CASE WHEN status IN ('filled', 'approved', 'revision') THEN 1 ELSE 0 END) as total,
+                SUM(CASE WHEN status = 'filled' THEN 1 ELSE 0 END) as needs_action,
+                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN status = 'revision' THEN 1 ELSE 0 END) as revision
+            ")
+            ->first();
 
         $stats = [
-            'total' => CustomerRegistration::whereIn('status', ['filled', 'approved', 'revision'])->count(),
-            'needs_action' => CustomerRegistration::where('status', 'filled')->count(),
-            'approved' => CustomerRegistration::where('status', 'approved')->count(),
-            'revision' => CustomerRegistration::where('status', 'revision')->count(),
+            'total' => (int) ($rawStats->total ?? 0),
+            'needs_action' => (int) ($rawStats->needs_action ?? 0),
+            'approved' => (int) ($rawStats->approved ?? 0),
+            'revision' => (int) ($rawStats->revision ?? 0),
         ];
 
-        return view('ccare.index', compact('registrations', 'stats', 'status', 'search'));
+        return view('ccare.index', compact('registrations', 'stats', 'status', 'search', 'perPage'));
     }
 
     public function show($id)

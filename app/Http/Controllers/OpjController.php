@@ -14,15 +14,39 @@ class OpjController extends Controller
     public function index(Request $request)
     {
         $status = $request->query('status', 'all');
-        $search = $request->query('search');
+        $search = trim((string) $request->query('search', ''));
+        $perPage = (int) $request->query('per_page', 10);
 
-        $query = CustomerRegistration::with(['sales', 'package']);
+        if (!in_array($perPage, [10, 25, 50, 100], true)) {
+            $perPage = 10;
+        }
+
+        // Selective column projection for minimal memory footprint and fast serialization
+        $query = CustomerRegistration::query()->select([
+            'id',
+            'registration_code',
+            'sales_user_id',
+            'sales_am_id',
+            'sales_name',
+            'customer_name',
+            'phone_wa',
+            'email',
+            'latitude',
+            'longitude',
+            'province',
+            'regency',
+            'district',
+            'village',
+            'address_detail',
+            'status',
+            'submitted_at',
+        ]);
 
         if ($status !== 'all') {
             $query->where('status', $status);
         }
 
-        if ($search) {
+        if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
                   ->orWhere('registration_code', 'like', "%{$search}%")
@@ -32,17 +56,32 @@ class OpjController extends Controller
             });
         }
 
-        $registrations = $query->latest('submitted_at')->paginate(10)->withQueryString();
+        // Index-optimized pagination
+        $registrations = $query->orderBy('submitted_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        // High-performance single aggregation query for KPI metrics (1 round-trip vs 5 round-trips)
+        $rawStats = CustomerRegistration::query()
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'submitted' THEN 1 ELSE 0 END) as pending_opj,
+                SUM(CASE WHEN status = 'verified' THEN 1 ELSE 0 END) as verified,
+                SUM(CASE WHEN status = 'filled' THEN 1 ELSE 0 END) as filled,
+                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved
+            ")
+            ->first();
 
         $stats = [
-            'total' => CustomerRegistration::count(),
-            'pending_opj' => CustomerRegistration::where('status', 'submitted')->count(),
-            'verified' => CustomerRegistration::where('status', 'verified')->count(),
-            'filled' => CustomerRegistration::where('status', 'filled')->count(),
-            'approved' => CustomerRegistration::where('status', 'approved')->count(),
+            'total' => (int) ($rawStats->total ?? 0),
+            'pending_opj' => (int) ($rawStats->pending_opj ?? 0),
+            'verified' => (int) ($rawStats->verified ?? 0),
+            'filled' => (int) ($rawStats->filled ?? 0),
+            'approved' => (int) ($rawStats->approved ?? 0),
         ];
 
-        return view('opj.index', compact('registrations', 'stats', 'status', 'search'));
+        return view('opj.index', compact('registrations', 'stats', 'status', 'search', 'perPage'));
     }
 
     public function show($id)

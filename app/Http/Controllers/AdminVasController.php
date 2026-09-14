@@ -9,6 +9,7 @@ use App\Models\CustomerRegistration;
 use App\Models\SubscriptionPackage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class AdminVasController extends Controller
 {
@@ -36,30 +37,68 @@ class AdminVasController extends Controller
         $module = $request->query('module', 'all');
         $action = $request->query('action', 'all');
         $search = $request->query('search');
+        $perPage = (int) $request->query('per_page', 15);
+        if (!in_array($perPage, [10, 15, 25, 50, 100], true)) {
+            $perPage = 15;
+        }
 
-        $query = AuditLog::with('user')->whereNotIn('action', ['LOGIN', 'LOGOUT']);
+        $query = AuditLog::query()
+            ->select([
+                'id',
+                'user_name',
+                'user_role',
+                'action',
+                'module',
+                'target_type',
+                'target_id',
+                'description',
+                'old_values',
+                'new_values',
+                'ip_address',
+                'user_agent',
+                'created_at',
+            ])
+            ->whereNotIn('action', ['LOGIN', 'LOGOUT']);
 
-        if ($module !== 'all') {
+        if ($module !== 'all' && filled($module)) {
             $query->where('module', $module);
         }
-        if ($action !== 'all') {
+        if ($action !== 'all' && filled($action)) {
             $query->where('action', $action);
         }
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('description', 'like', "%{$search}%")
-                  ->orWhere('user_name', 'like', "%{$search}%")
-                  ->orWhere('ip_address', 'like', "%{$search}%")
-                  ->orWhere('action', 'like', "%{$search}%");
+        if (filled($search)) {
+            $searchTerm = trim($search);
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('description', 'like', "%{$searchTerm}%")
+                  ->orWhere('user_name', 'like', "%{$searchTerm}%")
+                  ->orWhere('ip_address', 'like', "%{$searchTerm}%")
+                  ->orWhere('action', 'like', "%{$searchTerm}%")
+                  ->orWhere('module', 'like', "%{$searchTerm}%");
             });
         }
 
-        $logs = $query->latest('created_at')->paginate(15)->withQueryString();
+        // Fast index-optimized ordering and pagination
+        $logs = $query->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
 
-        $modules = AuditLog::whereNotIn('action', ['LOGIN', 'LOGOUT'])->select('module')->distinct()->pluck('module');
-        $actions = AuditLog::whereNotIn('action', ['LOGIN', 'LOGOUT'])->select('action')->distinct()->pluck('action');
+        // Cache distinct modules and actions to eliminate full table scans on every pagination request
+        $modules = Cache::remember('audit_logs_distinct_modules', 300, function () {
+            return AuditLog::whereNotIn('action', ['LOGIN', 'LOGOUT'])
+                ->select('module')
+                ->distinct()
+                ->pluck('module');
+        });
 
-        return view('vas.audit_logs', compact('logs', 'modules', 'actions', 'module', 'action', 'search'));
+        $actions = Cache::remember('audit_logs_distinct_actions', 300, function () {
+            return AuditLog::whereNotIn('action', ['LOGIN', 'LOGOUT'])
+                ->select('action')
+                ->distinct()
+                ->pluck('action');
+        });
+
+        return view('vas.audit_logs', compact('logs', 'modules', 'actions', 'module', 'action', 'search', 'perPage'));
     }
 
     public function users(Request $request)

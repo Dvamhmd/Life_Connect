@@ -16,9 +16,30 @@ class AdminSalesController extends Controller
         $salesId = $request->query('sales_id');
         $status = $request->query('status', 'all');
         $regency = $request->query('regency');
-        $search = $request->query('search');
+        $search = trim((string) $request->query('search', ''));
+        $perPage = (int) $request->query('per_page', 10);
 
-        $query = CustomerRegistration::with(['sales', 'package', 'progressLogs']);
+        if (!in_array($perPage, [10, 25, 50, 100], true)) {
+            $perPage = 10;
+        }
+
+        // Selective column projection & lightweight package eager load (no progressLogs or sales hydration needed)
+        $query = CustomerRegistration::query()
+            ->select([
+                'id',
+                'registration_code',
+                'sales_user_id',
+                'sales_am_id',
+                'sales_name',
+                'customer_name',
+                'phone_wa',
+                'village',
+                'regency',
+                'package_id',
+                'status',
+                'submitted_at',
+            ])
+            ->with(['package:id,name,price']);
 
         if ($salesId) {
             $query->where('sales_user_id', $salesId);
@@ -29,7 +50,7 @@ class AdminSalesController extends Controller
         if ($regency) {
             $query->where('regency', $regency);
         }
-        if ($search) {
+        if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('customer_name', 'like', "%{$search}%")
                   ->orWhere('registration_code', 'like', "%{$search}%")
@@ -38,37 +59,69 @@ class AdminSalesController extends Controller
             });
         }
 
-        $registrations = $query->latest('submitted_at')->paginate(10)->withQueryString();
+        // Fast index-optimized pagination
+        $registrations = $query->orderBy('submitted_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
 
-        // Summary Counts
-        $total = CustomerRegistration::count();
-        $submittedCount = CustomerRegistration::where('status', 'submitted')->count();
-        $verifiedCount = CustomerRegistration::where('status', 'verified')->count();
-        $filledCount = CustomerRegistration::where('status', 'filled')->count();
-        $approvedCount = CustomerRegistration::where('status', 'approved')->count();
-        $revisionCount = CustomerRegistration::where('status', 'revision')->count();
+        // 1. Single aggregation query for Top Summary KPI Counts (1 round-trip vs 6 round-trips)
+        $rawSummary = CustomerRegistration::query()
+            ->selectRaw("
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'submitted' THEN 1 ELSE 0 END) as submitted_count,
+                SUM(CASE WHEN status = 'verified' THEN 1 ELSE 0 END) as verified_count,
+                SUM(CASE WHEN status = 'filled' THEN 1 ELSE 0 END) as filled_count,
+                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved_count,
+                SUM(CASE WHEN status = 'revision' THEN 1 ELSE 0 END) as revision_count
+            ")
+            ->first();
 
-        // SLA Duration Analysis across stages (average seconds converted to hours/minutes)
-        $avgOpjDuration = RegistrationProgressLog::where('to_status', 'verified')
+        $total = (int) ($rawSummary->total ?? 0);
+        $submittedCount = (int) ($rawSummary->submitted_count ?? 0);
+        $verifiedCount = (int) ($rawSummary->verified_count ?? 0);
+        $filledCount = (int) ($rawSummary->filled_count ?? 0);
+        $approvedCount = (int) ($rawSummary->approved_count ?? 0);
+        $revisionCount = (int) ($rawSummary->revision_count ?? 0);
+
+        // 2. Single aggregation query for SLA Duration Analysis (1 round-trip vs 3 round-trips)
+        $slaStats = RegistrationProgressLog::query()
             ->whereNotNull('duration_seconds')
-            ->avg('duration_seconds');
+            ->whereIn('to_status', ['verified', 'filled', 'approved'])
+            ->selectRaw("
+                AVG(CASE WHEN to_status = 'verified' THEN duration_seconds END) as avg_opj,
+                AVG(CASE WHEN to_status = 'filled' THEN duration_seconds END) as avg_cust_fill,
+                AVG(CASE WHEN to_status = 'approved' THEN duration_seconds END) as avg_ccare
+            ")
+            ->first();
 
-        $avgCustFillDuration = RegistrationProgressLog::where('to_status', 'filled')
-            ->whereNotNull('duration_seconds')
-            ->avg('duration_seconds');
+        $avgOpjDuration = $slaStats->avg_opj ? (float) $slaStats->avg_opj : null;
+        $avgCustFillDuration = $slaStats->avg_cust_fill ? (float) $slaStats->avg_cust_fill : null;
+        $avgCCareDuration = $slaStats->avg_ccare ? (float) $slaStats->avg_ccare : null;
 
-        $avgCCareDuration = RegistrationProgressLog::where('to_status', 'approved')
-            ->whereNotNull('duration_seconds')
-            ->avg('duration_seconds');
+        // 3. Ultra-fast Sales Performance aggregation (1 query with GROUP BY vs 4*N queries in foreach)
+        $salesAgents = User::where('role', 'sales')->select(['id', 'name', 'sales_id'])->get();
 
-        // Sales Performance List
-        $salesAgents = User::where('role', 'sales')->get();
+        $salesMetrics = CustomerRegistration::query()
+            ->whereNotNull('sales_user_id')
+            ->selectRaw("
+                sales_user_id,
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved,
+                SUM(CASE WHEN status IN ('submitted', 'verified', 'filled') THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = 'revision' THEN 1 ELSE 0 END) as revision
+            ")
+            ->groupBy('sales_user_id')
+            ->get()
+            ->keyBy('sales_user_id');
+
         $salesPerformance = [];
         foreach ($salesAgents as $agent) {
-            $agentTotal = CustomerRegistration::where('sales_user_id', $agent->id)->count();
-            $agentApproved = CustomerRegistration::where('sales_user_id', $agent->id)->where('status', 'approved')->count();
-            $agentPending = CustomerRegistration::where('sales_user_id', $agent->id)->whereIn('status', ['submitted', 'verified', 'filled'])->count();
-            $agentRevision = CustomerRegistration::where('sales_user_id', $agent->id)->where('status', 'revision')->count();
+            $metric = $salesMetrics->get($agent->id);
+            $agentTotal = (int) ($metric->total ?? 0);
+            $agentApproved = (int) ($metric->approved ?? 0);
+            $agentPending = (int) ($metric->pending ?? 0);
+            $agentRevision = (int) ($metric->revision ?? 0);
 
             $salesPerformance[] = [
                 'id' => $agent->id,
@@ -83,7 +136,11 @@ class AdminSalesController extends Controller
         }
 
         // Available Filter Options
-        $regencies = CustomerRegistration::select('regency')->distinct()->pluck('regency');
+        $regencies = CustomerRegistration::query()
+            ->whereNotNull('regency')
+            ->where('regency', '!=', '')
+            ->distinct()
+            ->pluck('regency');
 
         return view('admin_sales.index', compact(
             'registrations',
@@ -102,7 +159,8 @@ class AdminSalesController extends Controller
             'salesId',
             'status',
             'regency',
-            'search'
+            'search',
+            'perPage'
         ));
     }
 

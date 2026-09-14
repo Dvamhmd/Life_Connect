@@ -182,6 +182,15 @@
             <div class="flex flex-wrap items-center gap-2">
                 <form action="{{ route('admin-sales.dashboard') }}" method="GET" class="flex flex-wrap items-center gap-2">
                     
+                    <!-- Per Page Selector -->
+                    <select name="per_page" onchange="this.form.submit()" 
+                            class="px-2.5 py-1.5 rounded-lg bg-gray-50 border border-gray-300 text-xs font-semibold text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] cursor-pointer">
+                        <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 / hal</option>
+                        <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 / hal</option>
+                        <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 / hal</option>
+                        <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 / hal</option>
+                    </select>
+
                     <!-- Sales Filter -->
                     <select name="sales_id" onchange="this.form.submit()" 
                             class="px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-xs text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B]">
@@ -205,8 +214,16 @@
                     </select>
 
                     <!-- Search Input -->
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama, kode..."
-                           class="px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-xs text-[#2C2C2C] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F48C5B] w-36">
+                    <div class="relative">
+                        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama, kode..."
+                               class="px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-xs text-[#2C2C2C] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F48C5B] w-36 sm:w-44">
+                    </div>
+
+                    @if($salesId || ($status && $status !== 'all') || $search || $regency)
+                        <a href="{{ route('admin-sales.dashboard', ['per_page' => $perPage]) }}" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:text-[#2C2C2C] text-xs font-semibold" title="Reset Filter">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    @endif
 
                     <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-[#F48C5B] hover:bg-[#EF666B] text-white text-xs font-bold shadow-xs">
                         Filter
@@ -345,9 +362,25 @@
             </table>
         </div>
 
-        @if($registrations->hasPages())
+        <!-- Pagination & Summary Footer -->
+        @if($registrations->total() > 0)
             <div class="p-4 border-t border-gray-100 bg-[#F8F9FA]">
-                {{ $registrations->links() }}
+                @if($registrations->hasPages())
+                    {{ $registrations->links() }}
+                @else
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <div>
+                            Menampilkan
+                            <span class="font-bold text-[#2C2C2C]">{{ $registrations->total() }}</span>
+                            dari
+                            <span class="font-bold text-[#2C2C2C]">{{ $registrations->total() }}</span>
+                            data pendaftaran pelanggan
+                        </div>
+                        <div class="text-[11px] text-gray-400 font-medium">
+                            Halaman 1 dari 1 (Semua data ditampilkan)
+                        </div>
+                    </div>
+                @endif
             </div>
         @endif
 

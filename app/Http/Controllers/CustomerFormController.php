@@ -52,9 +52,9 @@ class CustomerFormController extends Controller
             'billing_mobile' => ['required', 'string', 'max:30'],
             'billing_method' => ['nullable', 'string', 'max:100'],
             'billing_email' => ['required', 'email', 'max:150'],
-            'ktp_photo' => [$registration->ktp_photo_path ? 'nullable' : 'required', 'image', 'max:5120'], // 5MB max
-            'house_photo' => [$registration->house_photo_path ? 'nullable' : 'required', 'image', 'max:5120'],
-            'selfie_sales_photo' => [$registration->selfie_sales_path ? 'nullable' : 'required', 'image', 'max:5120'],
+            'ktp_photo' => [$registration->ktp_photo_path ? 'nullable' : 'required', 'image', 'max:15360'], // up to 15MB input, auto-compressed to WebP
+            'house_photo' => [$registration->house_photo_path ? 'nullable' : 'required', 'image', 'max:15360'],
+            'selfie_sales_photo' => [$registration->selfie_sales_path ? 'nullable' : 'required', 'image', 'max:15360'],
             'signature_data' => [$registration->signature_path ? 'nullable' : 'required', 'string'],
             'terms_agreed' => ['accepted'],
         ];
@@ -64,34 +64,30 @@ class CustomerFormController extends Controller
         $now = now();
         $oldStatus = $registration->status;
 
-        // Handle KTP Upload
+        // Handle KTP Upload (Auto Convert to WebP)
         $ktpPath = $registration->ktp_photo_path;
         if ($request->hasFile('ktp_photo')) {
-            $ktpPath = '/storage/' . $request->file('ktp_photo')->store('customers/ktp', 'public');
+            $ktpPath = $this->storeAsWebp($request->file('ktp_photo'), 'customers/ktp', 1600, 82);
         }
 
-        // Handle House Upload
+        // Handle House Upload (Auto Convert to WebP)
         $housePath = $registration->house_photo_path;
         if ($request->hasFile('house_photo')) {
-            $housePath = '/storage/' . $request->file('house_photo')->store('customers/house', 'public');
+            $housePath = $this->storeAsWebp($request->file('house_photo'), 'customers/house', 1600, 82);
         }
 
-        // Handle Selfie Sales Upload
+        // Handle Selfie Sales Upload (Auto Convert to WebP)
         $selfiePath = $registration->selfie_sales_path;
         if ($request->hasFile('selfie_sales_photo')) {
-            $selfiePath = '/storage/' . $request->file('selfie_sales_photo')->store('customers/selfie', 'public');
+            $selfiePath = $this->storeAsWebp($request->file('selfie_sales_photo'), 'customers/selfie', 1600, 82);
         }
 
-        // Handle Virtual Signature (base64 data)
+        // Handle Virtual Signature (Auto Convert to WebP)
         $signaturePath = $registration->signature_path;
         if ($request->filled('signature_data')) {
             $sigData = $request->input('signature_data');
             if (str_starts_with($sigData, 'data:image')) {
-                $image = str_replace('data:image/png;base64,', '', $sigData);
-                $image = str_replace(' ', '+', $image);
-                $imageName = 'customers/signatures/sig_' . $registration->registration_code . '_' . time() . '.png';
-                Storage::disk('public')->put($imageName, base64_decode($image));
-                $signaturePath = '/storage/' . $imageName;
+                $signaturePath = $this->storeSignatureAsWebp($sigData, $registration->registration_code);
             } else {
                 $signaturePath = $sigData;
             }
@@ -229,5 +225,121 @@ class CustomerFormController extends Controller
     {
         $registration = CustomerRegistration::with('package')->where('token', $token)->firstOrFail();
         return view('customer_form.success', compact('registration'));
+    }
+
+    /**
+     * Convert and store uploaded image to WebP format for fast performance and lightweight storage.
+     */
+    private function storeAsWebp(\Illuminate\Http\UploadedFile $file, string $folder, int $maxWidth = 1600, int $quality = 82): string
+    {
+        try {
+            $imageContent = file_get_contents($file->getRealPath());
+            $sourceImage = @imagecreatefromstring($imageContent);
+
+            if ($sourceImage === false) {
+                // Fallback to standard store if GD cannot decode
+                return '/storage/' . $file->store($folder, 'public');
+            }
+
+            $origWidth = imagesx($sourceImage);
+            $origHeight = imagesy($sourceImage);
+
+            // Resize if exceeds maxWidth while preserving aspect ratio
+            if ($origWidth > $maxWidth || $origHeight > $maxWidth) {
+                if ($origWidth > $origHeight) {
+                    $newWidth = $maxWidth;
+                    $newHeight = (int) round(($origHeight / $origWidth) * $maxWidth);
+                } else {
+                    $newHeight = $maxWidth;
+                    $newWidth = (int) round(($origWidth / $origHeight) * $maxWidth);
+                }
+
+                $resizedImage = imagecreatetruecolor($newWidth, $newHeight);
+                imagealphablending($resizedImage, false);
+                imagesavealpha($resizedImage, true);
+
+                imagecopyresampled(
+                    $resizedImage,
+                    $sourceImage,
+                    0, 0, 0, 0,
+                    $newWidth,
+                    $newHeight,
+                    $origWidth,
+                    $origHeight
+                );
+
+                imagedestroy($sourceImage);
+                $finalImage = $resizedImage;
+            } else {
+                $finalImage = $sourceImage;
+            }
+
+            // Output to WebP buffer
+            ob_start();
+            imagewebp($finalImage, null, $quality);
+            $webpData = ob_get_clean();
+            imagedestroy($finalImage);
+
+            $filename = $folder . '/' . Str::uuid() . '_' . time() . '.webp';
+            Storage::disk('public')->put($filename, $webpData);
+
+            return '/storage/' . $filename;
+        } catch (\Throwable $e) {
+            \Log::warning('WebP conversion failed, falling back to default store: ' . $e->getMessage());
+            return '/storage/' . $file->store($folder, 'public');
+        }
+    }
+
+    /**
+     * Convert and store base64 signature as WebP.
+     */
+    private function storeSignatureAsWebp(string $sigData, string $registrationCode, int $quality = 85): string
+    {
+        try {
+            // Remove data URI scheme header if present
+            $sigDataClean = preg_replace('/^data:image\/[a-zA-Z0-9]+;base64,/', '', $sigData);
+            $sigDataClean = str_replace(' ', '+', $sigDataClean);
+            $binaryData = base64_decode($sigDataClean);
+
+            if ($binaryData === false) {
+                return $sigData;
+            }
+
+            $sourceImage = @imagecreatefromstring($binaryData);
+            if ($sourceImage === false) {
+                // Fallback to raw png storage
+                $imageName = 'customers/signatures/sig_' . $registrationCode . '_' . time() . '.png';
+                Storage::disk('public')->put($imageName, $binaryData);
+                return '/storage/' . $imageName;
+            }
+
+            $width = imagesx($sourceImage);
+            $height = imagesy($sourceImage);
+
+            // Create canvas preserving alpha transparency
+            $finalImage = imagecreatetruecolor($width, $height);
+            imagealphablending($finalImage, false);
+            imagesavealpha($finalImage, true);
+            $transparent = imagecolorallocatealpha($finalImage, 255, 255, 255, 127);
+            imagefilledrectangle($finalImage, 0, 0, $width, $height, $transparent);
+            imagealphablending($finalImage, true);
+            imagecopy($finalImage, $sourceImage, 0, 0, 0, 0, $width, $height);
+            imagedestroy($sourceImage);
+
+            ob_start();
+            imagewebp($finalImage, null, $quality);
+            $webpData = ob_get_clean();
+            imagedestroy($finalImage);
+
+            $filename = 'customers/signatures/sig_' . $registrationCode . '_' . time() . '.webp';
+            Storage::disk('public')->put($filename, $webpData);
+
+            return '/storage/' . $filename;
+        } catch (\Throwable $e) {
+            \Log::warning('Signature WebP conversion failed: ' . $e->getMessage());
+            $imageName = 'customers/signatures/sig_' . $registrationCode . '_' . time() . '.png';
+            Storage::disk('public')->put($imageName, base64_decode(preg_replace('/^data:image\/[a-zA-Z0-9]+;base64,/', '', $sigData)));
+            return '/storage/' . $imageName;
+        }
     }
 }

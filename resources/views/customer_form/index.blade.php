@@ -560,7 +560,7 @@
                                 <div>
                                     <span class="font-extrabold text-[#2C2C2C] block text-xs group-hover:text-[#F48C5B] transition-colors">Unggah Foto KTP</span>
                                     <span class="text-[10px] text-gray-400 block mt-0.5">Klik atau seret file ke sini</span>
-                                    <span class="text-[9px] text-gray-400 font-medium">(JPG, PNG maks 5MB)</span>
+                                    <span class="text-[9px] text-[#F48C5B] font-semibold flex items-center justify-center gap-1 mt-0.5"><i class="fa-solid fa-bolt"></i> Auto WebP & Kompres</span>
                                 </div>
                             </div>
                         </div>
@@ -598,7 +598,7 @@
                                 <div>
                                     <span class="font-extrabold text-[#2C2C2C] block text-xs group-hover:text-[#F48C5B] transition-colors">Unggah Foto Rumah</span>
                                     <span class="text-[10px] text-gray-400 block mt-0.5">Tampak depan bangunan</span>
-                                    <span class="text-[9px] text-gray-400 font-medium">(JPG, PNG maks 5MB)</span>
+                                    <span class="text-[9px] text-[#F48C5B] font-semibold flex items-center justify-center gap-1 mt-0.5"><i class="fa-solid fa-bolt"></i> Auto WebP & Kompres</span>
                                 </div>
                             </div>
                         </div>
@@ -636,7 +636,7 @@
                                 <div>
                                     <span class="font-extrabold text-[#2C2C2C] block text-xs group-hover:text-[#F48C5B] transition-colors">Unggah Foto Selfie</span>
                                     <span class="text-[10px] text-gray-400 block mt-0.5">Bersama Petugas Sales</span>
-                                    <span class="text-[9px] text-gray-400 font-medium">(JPG, PNG maks 5MB)</span>
+                                    <span class="text-[9px] text-[#F48C5B] font-semibold flex items-center justify-center gap-1 mt-0.5"><i class="fa-solid fa-bolt"></i> Auto WebP & Kompres</span>
                                 </div>
                             </div>
                         </div>
@@ -728,22 +728,86 @@
             });
         }
 
-        // Live Image Preview Handler
-        function handleImagePreview(input, previewBoxId, placeholderId) {
-            if (input.files && input.files[0]) {
-                const file = input.files[0];
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const previewBox = document.getElementById(previewBoxId);
-                    const placeholder = document.getElementById(placeholderId);
-                    const img = previewBox.querySelector('img');
+        // Live Image Preview & Client-Side Fast WebP Converter
+        async function handleImagePreview(input, previewBoxId, placeholderId) {
+            if (!input.files || !input.files[0]) return;
+            
+            const file = input.files[0];
+            const previewBox = document.getElementById(previewBoxId);
+            const placeholder = document.getElementById(placeholderId);
+            const img = previewBox.querySelector('img');
+            
+            // Show instant preview
+            const objectUrl = URL.createObjectURL(file);
+            img.src = objectUrl;
+            previewBox.classList.remove('hidden');
+            if (placeholder) placeholder.classList.add('hidden');
+
+            // Asynchronous Client-side WebP Compression & Conversion
+            try {
+                const webpBlob = await compressAndConvertToWebp(file, 1600, 0.82);
+                if (webpBlob && typeof DataTransfer !== 'undefined') {
+                    const cleanName = file.name.replace(/\.[^/.]+$/, "") + ".webp";
+                    const webpFile = new File([webpBlob], cleanName, {
+                        type: "image/webp",
+                        lastModified: Date.now()
+                    });
                     
-                    img.src = e.target.result;
-                    previewBox.classList.remove('hidden');
-                    if (placeholder) placeholder.classList.add('hidden');
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(webpFile);
+                    input.files = dataTransfer.files;
+                    
+                    // Update preview source with converted webp
+                    const webpUrl = URL.createObjectURL(webpFile);
+                    img.src = webpUrl;
+                }
+            } catch (err) {
+                console.warn('Client WebP compression fallback to standard upload:', err);
+            }
+        }
+
+        // Fast In-Browser WebP Image Compressor using Canvas
+        function compressAndConvertToWebp(file, maxDimension = 1600, quality = 0.82) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = reject;
+                reader.onload = function(e) {
+                    const image = new Image();
+                    image.onerror = reject;
+                    image.onload = function() {
+                        let width = image.width;
+                        let height = image.height;
+
+                        if (width > maxDimension || height > maxDimension) {
+                            if (width > height) {
+                                height = Math.round((height * maxDimension) / width);
+                                width = maxDimension;
+                            } else {
+                                width = Math.round((width * maxDimension) / height);
+                                height = maxDimension;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(image, 0, 0, width, height);
+
+                        canvas.toBlob(function(blob) {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                reject(new Error('Canvas toBlob conversion failed'));
+                            }
+                        }, 'image/webp', quality);
+                    };
+                    image.src = e.target.result;
                 };
                 reader.readAsDataURL(file);
-            }
+            });
         }
 
         // Image Load Error Fallback Handler
@@ -961,8 +1025,15 @@
             }
             currentStroke = [];
             
-            // Save base64 signature to input
-            signatureDataInput.value = canvas.toDataURL('image/png');
+            // Save base64 signature to input (WebP format with fallback)
+            try {
+                const webpData = canvas.toDataURL('image/webp', 0.85);
+                signatureDataInput.value = (webpData && webpData.startsWith('data:image/webp')) 
+                    ? webpData 
+                    : canvas.toDataURL('image/png');
+            } catch (err) {
+                signatureDataInput.value = canvas.toDataURL('image/png');
+            }
         }
 
         function initCanvasEngine() {

@@ -37,6 +37,16 @@
                     @endforeach
                 </select>
 
+                <!-- Per Page Filter -->
+                <select name="per_page" onchange="this.form.submit()" 
+                        class="px-3 py-1.5 rounded-lg bg-white border border-gray-300 text-xs text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#9B385B]">
+                    <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 / hal</option>
+                    <option value="15" {{ $perPage == 15 ? 'selected' : '' }}>15 / hal</option>
+                    <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 / hal</option>
+                    <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 / hal</option>
+                    <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 / hal</option>
+                </select>
+
                 <!-- Search -->
                 <div class="relative w-44">
                     <input type="text" name="search" value="{{ $search }}" placeholder="Cari user, IP, aksi..."
@@ -47,7 +57,7 @@
                     Filter
                 </button>
 
-                @if($module !== 'all' || $action !== 'all' || $search)
+                @if($module !== 'all' || $action !== 'all' || $search || $perPage !== 15)
                     <a href="{{ route('vas.audit-logs') }}" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:text-[#2C2C2C] text-xs">
                         Reset
                     </a>
@@ -144,9 +154,25 @@
             </table>
         </div>
 
-        @if($logs->hasPages())
+        <!-- Pagination & Summary Footer -->
+        @if($logs->total() > 0)
             <div class="p-4 border-t border-gray-100 bg-[#F8F9FA]">
-                {{ $logs->links() }}
+                @if($logs->hasPages())
+                    {{ $logs->links() }}
+                @else
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <div>
+                            Menampilkan
+                            <span class="font-bold text-[#2C2C2C]">{{ $logs->total() }}</span>
+                            dari
+                            <span class="font-bold text-[#2C2C2C]">{{ $logs->total() }}</span>
+                            rekaman audit log
+                        </div>
+                        <div class="text-[11px] text-gray-400 font-medium">
+                            Halaman 1 dari 1 (Semua data ditampilkan)
+                        </div>
+                    </div>
+                @endif
             </div>
         @endif
 

@@ -72,43 +72,63 @@
     <div class="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
         
         <!-- Table Filter and Search Header -->
-        <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
+        <div class="p-4 sm:p-5 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white">
             
             <!-- Status Filter Tabs -->
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0 custom-scrollbar">
-                <a href="{{ route('opj.index', ['status' => 'all', 'search' => $search]) }}" 
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 custom-scrollbar">
+                <a href="{{ route('opj.index', ['status' => 'all', 'search' => $search, 'per_page' => $perPage]) }}" 
                    class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'all' ? 'bg-gradient-to-r from-[#F48C5B] via-[#EF666B] to-[#9B385B] text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
                     Semua ({{ $stats['total'] }})
                 </a>
-                <a href="{{ route('opj.index', ['status' => 'submitted', 'search' => $search]) }}" 
+                <a href="{{ route('opj.index', ['status' => 'submitted', 'search' => $search, 'per_page' => $perPage]) }}" 
                    class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'submitted' ? 'bg-[#F48C5B] text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
                     Menunggu OPJ ({{ $stats['pending_opj'] }})
                 </a>
-                <a href="{{ route('opj.index', ['status' => 'verified', 'search' => $search]) }}" 
+                <a href="{{ route('opj.index', ['status' => 'verified', 'search' => $search, 'per_page' => $perPage]) }}" 
                    class="px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all {{ $status === 'verified' ? 'bg-blue-600 text-white shadow-xs' : 'bg-gray-100 text-gray-600 hover:text-[#2C2C2C] hover:bg-gray-200' }}">
                     Terverifikasi ({{ $stats['verified'] }})
                 </a>
             </div>
 
-            <!-- Search Form -->
-            <form action="{{ route('opj.index') }}" method="GET" class="flex items-center gap-2">
-                <input type="hidden" name="status" value="{{ $status }}">
-                <div class="relative w-full sm:w-64">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-xs">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </span>
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama, kode, sales..."
-                           class="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white border border-gray-300 text-xs text-[#2C2C2C] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F48C5B]">
-                </div>
-                @if($search)
-                    <a href="{{ route('opj.index', ['status' => $status]) }}" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:text-[#2C2C2C] text-xs">
-                        <i class="fa-solid fa-xmark"></i>
-                    </a>
-                @endif
-                <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-[#F48C5B] hover:bg-[#EF666B] text-white text-xs font-bold transition-colors shadow-xs">
-                    Cari
-                </button>
-            </form>
+            <!-- Search Form & Per Page Selector -->
+            <div class="flex flex-wrap items-center gap-2.5">
+                <!-- Per Page Selector -->
+                <form action="{{ route('opj.index') }}" method="GET" class="flex items-center gap-1.5 text-xs text-gray-500">
+                    <input type="hidden" name="status" value="{{ $status }}">
+                    @if($search)
+                        <input type="hidden" name="search" value="{{ $search }}">
+                    @endif
+                    <span class="hidden sm:inline text-xs font-medium text-gray-500">Tampil:</span>
+                    <select name="per_page" onchange="this.form.submit()" 
+                            class="px-2.5 py-1.5 rounded-lg bg-gray-50 border border-gray-300 text-xs font-semibold text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] cursor-pointer">
+                        <option value="10" {{ $perPage == 10 ? 'selected' : '' }}>10 / hal</option>
+                        <option value="25" {{ $perPage == 25 ? 'selected' : '' }}>25 / hal</option>
+                        <option value="50" {{ $perPage == 50 ? 'selected' : '' }}>50 / hal</option>
+                        <option value="100" {{ $perPage == 100 ? 'selected' : '' }}>100 / hal</option>
+                    </select>
+                </form>
+
+                <!-- Search Form -->
+                <form action="{{ route('opj.index') }}" method="GET" class="flex items-center gap-2">
+                    <input type="hidden" name="status" value="{{ $status }}">
+                    <input type="hidden" name="per_page" value="{{ $perPage }}">
+                    <div class="relative w-full sm:w-56 md:w-64">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400 text-xs">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" name="search" value="{{ $search }}" placeholder="Cari nama, kode, sales..."
+                               class="w-full pl-8 pr-3 py-1.5 rounded-lg bg-white border border-gray-300 text-xs text-[#2C2C2C] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F48C5B]">
+                    </div>
+                    @if($search)
+                        <a href="{{ route('opj.index', ['status' => $status, 'per_page' => $perPage]) }}" class="px-2.5 py-1.5 rounded-lg bg-gray-100 text-gray-600 hover:text-[#2C2C2C] text-xs">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    @endif
+                    <button type="submit" class="px-3.5 py-1.5 rounded-lg bg-[#F48C5B] hover:bg-[#EF666B] text-white text-xs font-bold transition-colors shadow-xs">
+                        Cari
+                    </button>
+                </form>
+            </div>
         </div>
 
         <!-- Table Listing -->
@@ -229,10 +249,25 @@
             </table>
         </div>
 
-        <!-- Pagination -->
-        @if($registrations->hasPages())
+        <!-- Pagination & Summary Footer -->
+        @if($registrations->total() > 0)
             <div class="p-4 border-t border-gray-100 bg-[#F8F9FA]">
-                {{ $registrations->links() }}
+                @if($registrations->hasPages())
+                    {{ $registrations->links() }}
+                @else
+                    <div class="flex items-center justify-between text-xs text-gray-500">
+                        <div>
+                            Menampilkan
+                            <span class="font-bold text-[#2C2C2C]">{{ $registrations->total() }}</span>
+                            dari
+                            <span class="font-bold text-[#2C2C2C]">{{ $registrations->total() }}</span>
+                            data survey
+                        </div>
+                        <div class="text-[11px] text-gray-400 font-medium">
+                            Halaman 1 dari 1 (Semua data ditampilkan)
+                        </div>
+                    </div>
+                @endif
             </div>
         @endif
 
