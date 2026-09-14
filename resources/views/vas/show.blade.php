@@ -203,7 +203,10 @@
                                     <div>
                                         Pelaksana: <strong class="text-[#2C2C2C]">{{ $log->actor_name }}</strong>
                                     </div>
-                                    @if($log->duration_seconds)
+                                    @php
+                                        $durSec = $log->duration_seconds ?? $log->calculated_duration_seconds;
+                                    @endphp
+                                    @if($durSec !== null && ($durSec > 0 || in_array($log->to_status, ['verified', 'filled', 'approved', 'revision'])))
                                         <div class="text-[#9B385B] font-bold bg-[#FEF4F0] px-2 py-0.5 rounded border border-[#F48C5B]/30">
                                             Durasi: <strong>{{ $log->formatted_duration }}</strong>
                                         </div>
@@ -353,31 +356,6 @@
                             <div class="text-xs font-bold text-[#F48C5B]">{{ $registration->package->formatted_price }} / bulan</div>
                         @endif
                     </div>
-
-                    @if($registration->services_selected)
-                        <div class="p-3 rounded-2xl bg-gray-50 border border-gray-200 space-y-1.5 text-xs">
-                            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">Detail Layanan Dipilih:</span>
-                            @foreach($registration->services_selected as $srvKey => $srvVal)
-                                @if(($srvVal['opt1'] ?? false) || ($srvVal['opt2'] ?? false) || !empty($srvVal['text1']) || !empty($srvVal['text2']))
-                                    <div class="p-2 rounded-xl bg-white border border-gray-200 text-[11px] space-y-0.5">
-                                        <div class="font-bold text-[#9B385B] uppercase">{{ str_replace('_', ' ', $srvKey) }}</div>
-                                        @if(($srvVal['opt1'] ?? false) || !empty($srvVal['text1']))
-                                            <div class="text-gray-700 flex items-start gap-1">
-                                                <span class="text-emerald-700 font-bold">•</span>
-                                                <span class="text-gray-600">{{ !empty($srvVal['text1']) ? $srvVal['text1'] : 'Aktif' }}</span>
-                                            </div>
-                                        @endif
-                                        @if(($srvVal['opt2'] ?? false) || !empty($srvVal['text2']))
-                                            <div class="text-gray-700 flex items-start gap-1">
-                                                <span class="text-emerald-700 font-bold">•</span>
-                                                <span class="text-gray-600">{{ !empty($srvVal['text2']) ? $srvVal['text2'] : 'Aktif' }}</span>
-                                            </div>
-                                        @endif
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-                    @endif
 
                     <div class="grid grid-cols-2 gap-3 pt-1 border-t border-gray-100">
                         <div>
@@ -555,7 +533,7 @@
 
     <!-- Viewer Viewport Canvas -->
     <div id="imageViewerContainer" class="flex-1 relative overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing">
-        <img id="imageViewerImg" src="" alt="Pratinjau Gambar" class="max-w-none transition-transform duration-75 origin-center pointer-events-none rounded-lg shadow-2xl">
+        <img id="imageViewerImg" src="" alt="Pratinjau Gambar" class="max-w-none transition-transform duration-75 origin-center pointer-events-none rounded-lg shadow-2xl bg-white">
     </div>
 
     <!-- Bottom Instruction Helper -->

@@ -225,7 +225,10 @@
                                         <div>
                                             Pelaksana: <strong class="text-gray-700">{{ $log->actor_name }}</strong>
                                         </div>
-                                        @if($log->duration_seconds)
+                                        @php
+                                            $durSec = $log->duration_seconds ?? $log->calculated_duration_seconds;
+                                        @endphp
+                                        @if($durSec !== null && ($durSec > 0 || in_array($log->to_status, ['verified', 'filled', 'approved', 'revision'])))
                                             <div class="text-[#F48C5B] font-bold bg-[#FEF4F0] px-2 py-0.5 rounded border border-[#F48C5B]/30">
                                                 Durasi: <strong>{{ $log->formatted_duration }}</strong>
                                             </div>
@@ -806,7 +809,7 @@
 
     <!-- Main Image Viewport Area (Pan & Zoom Canvas) -->
     <div id="viewerContainer" class="flex-1 w-full h-full relative overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing touch-none">
-        <img id="viewerImage" src="" alt="Preview Dokumen" class="max-h-[85vh] max-w-[90vw] object-contain transition-transform duration-75 ease-out will-change-transform shadow-2xl rounded-lg pointer-events-auto">
+        <img id="viewerImage" src="" alt="Preview Dokumen" class="max-h-[85vh] max-w-[90vw] object-contain transition-transform duration-75 ease-out will-change-transform shadow-2xl rounded-lg pointer-events-auto bg-white">
     </div>
 
     <!-- Bottom Helper Bar -->

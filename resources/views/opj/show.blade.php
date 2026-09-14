@@ -86,7 +86,10 @@
                                 <div class="text-gray-600 mt-1 leading-relaxed font-normal">{{ $log->notes }}</div>
                                 <div class="text-[10px] text-gray-500 mt-1 flex items-center gap-2">
                                     <span>Oleh: <strong class="text-gray-700">{{ $log->actor_name }} ({{ $log->actor_role }})</strong></span>
-                                    @if($log->duration_seconds)
+                                    @php
+                                        $durSec = $log->duration_seconds ?? $log->calculated_duration_seconds;
+                                    @endphp
+                                    @if($durSec !== null && ($durSec > 0 || in_array($log->to_status, ['verified', 'filled', 'approved', 'revision'])))
                                         <span>• Durasi proses: <strong class="text-[#F48C5B] font-bold">{{ $log->formatted_duration }}</strong></span>
                                     @endif
                                 </div>

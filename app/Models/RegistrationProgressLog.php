@@ -46,13 +46,39 @@ class RegistrationProgressLog extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function getCalculatedDurationSecondsAttribute(): ?int
+    {
+        if ($this->duration_seconds !== null && $this->duration_seconds > 0) {
+            return $this->duration_seconds;
+        }
+
+        if ($this->to_status === 'verified') {
+            $startTime = $this->registration?->submitted_at ?? $this->registration?->created_at;
+            if ($startTime && $this->created_at) {
+                return max(0, abs((int) round($this->created_at->diffInSeconds($startTime))));
+            }
+        } elseif ($this->to_status === 'filled') {
+            $startTime = $this->registration?->verified_at;
+            if ($startTime && $this->created_at) {
+                return max(0, abs((int) round($this->created_at->diffInSeconds($startTime))));
+            }
+        } elseif (in_array($this->to_status, ['approved', 'revision'])) {
+            $startTime = $this->registration?->filled_at;
+            if ($startTime && $this->created_at) {
+                return max(0, abs((int) round($this->created_at->diffInSeconds($startTime))));
+            }
+        }
+
+        return $this->duration_seconds;
+    }
+
     public function getFormattedDurationAttribute(): string
     {
-        if (!$this->duration_seconds) {
+        $seconds = $this->calculated_duration_seconds ?? $this->duration_seconds;
+        if ($seconds === null) {
             return '-';
         }
 
-        $seconds = $this->duration_seconds;
         if ($seconds < 60) {
             return $seconds . ' detik';
         }

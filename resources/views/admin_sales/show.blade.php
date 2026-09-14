@@ -72,7 +72,10 @@
                                     <div>
                                         Pelaksana: <strong class="text-[#2C2C2C]">{{ $log->actor_name }}</strong>
                                     </div>
-                                    @if($log->duration_seconds)
+                                    @php
+                                        $durSec = $log->duration_seconds ?? $log->calculated_duration_seconds;
+                                    @endphp
+                                    @if($durSec !== null && ($durSec > 0 || in_array($log->to_status, ['verified', 'filled', 'approved', 'revision'])))
                                         <div class="text-[#9B385B] font-bold bg-[#FEF4F0] px-2 py-0.5 rounded border border-[#F48C5B]/30">
                                             Durasi dari tahap sebelumnya: <strong>{{ $log->formatted_duration }}</strong>
                                         </div>

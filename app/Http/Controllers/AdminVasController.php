@@ -430,6 +430,18 @@ class AdminVasController extends Controller
             $notes = "Kategori: {$request->rejection_category}. " . $notes;
         }
 
+        $durationSeconds = null;
+        if ($newStatus === 'verified') {
+            $startTime = $registration->submitted_at ?? $registration->created_at;
+            $durationSeconds = $startTime ? max(0, abs((int) round($now->diffInSeconds($startTime)))) : null;
+        } elseif ($newStatus === 'filled') {
+            $startTime = $registration->verified_at;
+            $durationSeconds = $startTime ? max(0, abs((int) round($now->diffInSeconds($startTime)))) : null;
+        } elseif (in_array($newStatus, ['approved', 'revision'])) {
+            $startTime = $registration->filled_at ?? $registration->verified_at ?? $registration->submitted_at;
+            $durationSeconds = $startTime ? max(0, abs((int) round($now->diffInSeconds($startTime)))) : null;
+        }
+
         RegistrationProgressLog::create([
             'customer_registration_id' => $registration->id,
             'user_id' => $user->id,
@@ -438,7 +450,7 @@ class AdminVasController extends Controller
             'from_status' => $oldStatus,
             'to_status' => $newStatus,
             'notes' => $notes,
-            'duration_seconds' => null,
+            'duration_seconds' => $durationSeconds,
             'created_at' => $now,
         ]);
 

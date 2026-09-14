@@ -214,7 +214,7 @@
             <!-- STEP 1: DATA PRIBADI -->
             <div id="step-1" class="step-pane transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-300 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             1
                         </div>
@@ -401,7 +401,7 @@
             <!-- STEP 2: PAKET BERLANGGANAN -->
             <div id="step-2" class="step-pane hidden transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-300 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             2
                         </div>
@@ -441,7 +441,7 @@
                             <!-- 1. TV KABEL -->
                             <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between min-w-0 overflow-hidden">
                                 <div class="min-w-0 w-full">
-                                    <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
+                                    <div class="flex items-center gap-2.5 border-b border-gray-200 pb-2.5">
                                         <div class="w-8 h-8 rounded-xl bg-orange-50 text-[#F48C5B] border border-orange-100 flex items-center justify-center font-bold text-sm shadow-2xs">
                                             <i class="fa-solid fa-tv"></i>
                                         </div>
@@ -476,7 +476,7 @@
                             <!-- 2. INTERNET -->
                             <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between min-w-0 overflow-hidden">
                                 <div class="min-w-0 w-full">
-                                    <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
+                                    <div class="flex items-center gap-2.5 border-b border-gray-200 pb-2.5">
                                         <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-bold text-sm shadow-2xs">
                                             <i class="fa-solid fa-wifi"></i>
                                         </div>
@@ -531,7 +531,7 @@
                             <!-- 3. TELEPON -->
                             <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between min-w-0 overflow-hidden">
                                 <div class="min-w-0 w-full">
-                                    <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
+                                    <div class="flex items-center gap-2.5 border-b border-gray-200 pb-2.5">
                                         <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold text-sm shadow-2xs">
                                             <i class="fa-solid fa-phone"></i>
                                         </div>
@@ -572,7 +572,7 @@
                     </div>
 
                     <!-- Textfield Jangka Waktu Berlangganan -->
-                    <div class="pt-4 border-t border-gray-100">
+                    <div class="pt-4 border-t border-gray-200">
                         <label for="subscription_period" class="block font-bold text-xs text-[#333333] mb-1.5">
                             Jangka Waktu Berlangganan <span class="text-rose-500">*</span>
                         </label>
@@ -600,7 +600,7 @@
             <!-- STEP 3: INFORMASI PENAGIHAN -->
             <div id="step-3" class="step-pane hidden transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-300 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             3
                         </div>
@@ -688,7 +688,7 @@
             <!-- STEP 4: KELENGKAPAN DOKUMEN FOTO (PREVIEW ENABLED) -->
             <div id="step-4" class="step-pane hidden transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-300 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             4
                         </div>
@@ -829,7 +829,7 @@
             <!-- STEP 5: PERSETUJUAN BERLANGGANAN & TANDA TANGAN VIRTUAL -->
             <div id="step-5" class="step-pane hidden transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-300 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             5
                         </div>

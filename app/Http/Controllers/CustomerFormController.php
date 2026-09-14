@@ -365,12 +365,10 @@ class CustomerFormController extends Controller
             $width = imagesx($sourceImage);
             $height = imagesy($sourceImage);
 
-            // Create canvas preserving alpha transparency
+            // Create canvas with solid white background
             $finalImage = imagecreatetruecolor($width, $height);
-            imagealphablending($finalImage, false);
-            imagesavealpha($finalImage, true);
-            $transparent = imagecolorallocatealpha($finalImage, 255, 255, 255, 127);
-            imagefilledrectangle($finalImage, 0, 0, $width, $height, $transparent);
+            $white = imagecolorallocate($finalImage, 255, 255, 255);
+            imagefilledrectangle($finalImage, 0, 0, $width, $height, $white);
             imagealphablending($finalImage, true);
             imagecopy($finalImage, $sourceImage, 0, 0, 0, 0, $width, $height);
             imagedestroy($sourceImage);
