@@ -243,21 +243,21 @@
                 <!-- In-App Push Notification Dropdown Banner -->
                 <div id="pushBanner" class="hidden mx-3 mt-2.5 bg-white/95 backdrop-blur-md rounded-2xl p-3 border-2 border-emerald-500 shadow-xl transition-all duration-300 cursor-pointer animate-pulse z-40" onclick="handlePushBannerClick()">
                     <div class="flex items-start gap-2.5">
-                        <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm shrink-0">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm shrink-0" id="pushBannerIcon">
                             <i class="fa-brands fa-whatsapp text-lg"></i>
                         </div>
                         <div class="flex-1 min-w-0 text-left">
                             <div class="flex items-center justify-between">
                                 <span class="font-extrabold text-[11px] text-[#2C2C2C] flex items-center gap-1">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping" id="pushBannerDot"></span>
                                     <span id="pushBannerTitle">Survey Terverifikasi OPJ!</span>
                                 </span>
                                 <span class="text-[9px] text-gray-400 font-mono">Baru saja</span>
                             </div>
                             <p class="text-[10px] text-gray-600 mt-0.5 line-clamp-2" id="pushBannerMsg">Pengajuan diverifikasi OPJ. Klik untuk bagikan link WhatsApp!</p>
-                            <div class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-xs">
-                                <i class="fa-brands fa-whatsapp"></i>
-                                <span>Bagikan Link WA Sekarang</span>
+                            <div class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-xs" id="pushBannerBtn">
+                                <i class="fa-brands fa-whatsapp" id="pushBannerBtnIcon"></i>
+                                <span id="pushBannerBtnText">Bagikan Link WA Sekarang</span>
                             </div>
                         </div>
                         <button type="button" onclick="event.stopPropagation(); closePushBanner();" class="text-gray-400 hover:text-gray-600 text-xs p-1">
@@ -484,16 +484,21 @@
     <!-- WhatsApp Share Confirmation Modal inside Simulator -->
     <div id="waModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm p-4 flex items-center justify-center">
         <div class="bg-white border border-gray-200 rounded-3xl p-5 max-w-sm w-full space-y-4 text-xs shadow-2xl">
-            <div class="flex items-center gap-2 font-bold text-emerald-600 text-sm border-b border-gray-100 pb-3">
-                <i class="fa-brands fa-whatsapp text-lg"></i>
-                <span>Bagikan Link WA ke Pelanggan</span>
+            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div class="flex items-center gap-2 font-bold text-emerald-600 text-sm" id="waModalHeader">
+                    <i class="fa-brands fa-whatsapp text-lg" id="waModalHeaderIcon"></i>
+                    <span id="waModalTitle">Bagikan Link WA ke Pelanggan</span>
+                </div>
+                <button type="button" onclick="closeWaModal()" class="text-gray-400 hover:text-gray-600 text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
-            <p class="text-gray-600 leading-relaxed">
+            <p class="text-gray-600 leading-relaxed" id="waModalSub">
                 Pesan WhatsApp resmi akan diteruskan ke nomor calon pelanggan:
             </p>
 
-            <div class="p-3 rounded-xl bg-[#F8F9FA] border border-gray-200 text-[11px] font-mono text-gray-700 whitespace-pre-wrap max-h-40 overflow-y-auto" id="waMessagePreview"></div>
+            <div class="p-3 rounded-xl bg-[#F8F9FA] border border-gray-200 text-[11px] font-mono text-gray-700 whitespace-pre-wrap max-h-48 overflow-y-auto" id="waMessagePreview"></div>
 
             <div class="flex items-center justify-end gap-2 pt-2">
                 <button type="button" onclick="closeWaModal()" class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-semibold transition-colors">
@@ -501,7 +506,7 @@
                 </button>
                 <a id="waDirectLink" href="#" target="_blank" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 inline-flex items-center gap-1.5 transition-colors">
                     <i class="fa-brands fa-whatsapp"></i>
-                    <span>Kirim via WhatsApp Web</span>
+                    <span id="waDirectBtnText">Kirim via WhatsApp Web</span>
                 </a>
             </div>
         </div>
@@ -730,15 +735,17 @@
                         if (item.status === 'revision') badgeColor = 'bg-rose-50 text-rose-700 border-rose-200';
 
                         let actionHtml = '';
+                        const custName = item.customer_name;
+                        const phone = item.phone_wa || '';
+                        const regCode = item.registration_code || '';
+                        const tokenUrl = window.location.origin + '/pendaftaran/' + (item.token || '');
+
                         if (item.status === 'verified') {
-                            const custName = item.customer_name;
-                            const phone = item.phone_wa || '';
-                            const tokenUrl = window.location.origin + '/pendaftaran/' + (item.token || '');
                             const waText = `Halo Bapak/Ibu ${custName},\n\nTerima kasih telah mengajukan pendaftaran layanan LifeMedia. Lokasi rumah Anda telah diverifikasi oleh tim teknis kami (OPJ).\n\nSilakan lengkapi data registrasi dan tanda tangan formulir berlangganan melalui tautan resmi LifeMedia berikut:\n${tokenUrl}\n\nSalam hangat,\nTim LifeMedia`;
 
                             actionHtml = `
                                 <div class="pt-2 border-t border-gray-100 mt-2">
-                                    <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}')"
+                                    <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', null, 'verified')"
                                             class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-colors">
                                         <i class="fa-brands fa-whatsapp text-sm"></i>
                                         <span>Bagikan Link WA ke Pelanggan</span>
@@ -749,7 +756,7 @@
                             actionHtml = `
                                 <div class="pt-1.5 border-t border-gray-100 mt-1.5 flex items-center gap-1 text-[10px] text-indigo-700 font-semibold">
                                     <i class="fa-solid fa-circle-check"></i>
-                                    <span>Pelanggan sudah mengisi formulir online</span>
+                                    <span>Pelanggan sudah mengisi formulir online (Menunggu C-Care)</span>
                                 </div>
                             `;
                         } else if (item.status === 'approved') {
@@ -760,16 +767,30 @@
                                 </div>
                             `;
                         } else if (item.status === 'revision') {
+                            const reason = item.rejection_category || 'Perbaikan Dokumen';
+                            const notes = item.rejection_notes || 'Mohon lengkapi dan upload ulang data pendaftaran.';
+                            const waText = `Halo Bapak/Ibu ${custName},\n\nMohon maaf, pengajuan pendaftaran layanan LifeMedia Anda (${regCode}) memerlukan perbaikan/revisi data oleh tim C-Care.\n\nKategori: ${reason}\nCatatan Revisi: ${notes}\n\nSilakan perbaiki data dan lengkapi dokumen melalui tautan resmi LifeMedia berikut:\n${tokenUrl}\n\nSalam hangat,\nTim LifeMedia`;
+
                             actionHtml = `
-                                <div class="pt-1.5 border-t border-gray-100 mt-1.5 flex items-center gap-1 text-[10px] text-rose-700 font-semibold">
-                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                    <span>Perlu perbaikan data / revisi</span>
+                                <div class="pt-2 border-t border-rose-100 mt-2 space-y-2">
+                                    <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[10px] text-rose-800 space-y-0.5">
+                                        <div class="font-bold flex items-center gap-1 text-rose-700">
+                                            <i class="fa-solid fa-triangle-exclamation"></i>
+                                            <span>Revisi: ${reason}</span>
+                                        </div>
+                                        <p class="text-gray-600 line-clamp-2">${notes}</p>
+                                    </div>
+                                    <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', null, 'revision', '${reason}')"
+                                            class="w-full py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                                        <span>Kirim Link Revisi via WA</span>
+                                    </button>
                                 </div>
                             `;
                         }
 
                         html += `
-                            <div class="p-3.5 rounded-2xl bg-white border ${item.status === 'verified' ? 'border-blue-300 ring-1 ring-blue-100' : 'border-gray-200'} shadow-sm space-y-1.5">
+                            <div class="p-3.5 rounded-2xl bg-white border ${item.status === 'revision' ? 'border-rose-300 ring-1 ring-rose-100' : (item.status === 'verified' ? 'border-blue-300 ring-1 ring-blue-100' : 'border-gray-200')} shadow-sm space-y-1.5">
                                 <div class="flex items-start justify-between gap-2">
                                     <div>
                                         <div class="font-bold text-[#2C2C2C]">${item.customer_name}</div>
@@ -815,43 +836,89 @@
                         if (!item.is_read) unreadCount++;
 
                         let actionHtml = '';
-                        if (item.action_type === 'share_whatsapp' || item.type === 'survey_verified') {
-                            const reg = item.registration;
-                            const custName = reg ? reg.customer_name : 'Pelanggan';
-                            const phone = reg ? reg.phone_wa : '';
-                            const tokenUrl = window.location.origin + '/pendaftaran/' + (reg ? reg.token : '');
+                        const reg = item.registration;
+                        const custName = reg ? reg.customer_name : 'Pelanggan';
+                        const phone = reg ? reg.phone_wa : '';
+                        const regCode = reg ? reg.registration_code : '';
+                        const tokenUrl = window.location.origin + '/pendaftaran/' + (reg ? reg.token : '');
+
+                        if (item.type === 'survey_verified' || item.action_type === 'share_whatsapp') {
                             const waText = `Halo Bapak/Ibu ${custName},\n\nTerima kasih telah mengajukan pendaftaran layanan LifeMedia. Lokasi rumah Anda telah diverifikasi oleh tim teknis kami (OPJ).\n\nSilakan lengkapi data registrasi dan tanda tangan formulir berlangganan melalui tautan resmi LifeMedia berikut:\n${tokenUrl}\n\nSalam hangat,\nTim LifeMedia`;
 
                             // Trigger push banner if unread and not yet toasted
                             if (!item.is_read && !notifiedIds.has(item.id)) {
                                 notifiedIds.add(item.id);
-                                showPushBanner(custName, phone, waText, tokenUrl, item.id);
+                                showPushBanner('verified', custName, phone, waText, tokenUrl, item.id, item.title, item.message);
                             }
 
                             actionHtml = `
                                 <div class="pt-2">
-                                    <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', ${item.id})"
+                                    <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', ${item.id}, 'verified')"
                                             class="w-full py-2 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-colors">
                                         <i class="fa-brands fa-whatsapp text-sm"></i>
                                         <span>Bagikan Link WA Ke Pelanggan</span>
                                     </button>
                                 </div>
                             `;
-                        } else if (item.type === 'registration_revision') {
+                        } else if (item.type === 'registration_revision' || item.action_type === 'revise_data') {
+                            const reason = (reg && reg.rejection_category) ? reg.rejection_category : 'Perbaikan Dokumen';
+                            const notes = (reg && reg.rejection_notes) ? reg.rejection_notes : item.message;
+                            const waText = `Halo Bapak/Ibu ${custName},\n\nMohon maaf, pengajuan pendaftaran layanan LifeMedia Anda (${regCode}) memerlukan perbaikan/revisi data oleh tim C-Care.\n\nKategori: ${reason}\nCatatan Revisi: ${notes}\n\nSilakan perbaiki data dan lengkapi dokumen melalui tautan resmi LifeMedia berikut:\n${tokenUrl}\n\nSalam hangat,\nTim LifeMedia`;
+
+                            // Trigger push banner if unread and not yet toasted
+                            if (!item.is_read && !notifiedIds.has(item.id)) {
+                                notifiedIds.add(item.id);
+                                showPushBanner('revision', custName, phone, waText, tokenUrl, item.id, item.title, item.message, reason);
+                            }
+
                             actionHtml = `
                                 <div class="pt-2">
-                                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">
-                                        Perlu Follow Up Revisi
-                                    </span>
+                                    <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', ${item.id}, 'revision', '${reason}')"
+                                            class="w-full py-2 px-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-brands fa-whatsapp text-sm"></i>
+                                        <span>Kirim Notifikasi Revisi ke WA Pelanggan</span>
+                                    </button>
+                                </div>
+                            `;
+                        } else if (item.type === 'registration_approved') {
+                            if (!item.is_read && !notifiedIds.has(item.id)) {
+                                notifiedIds.add(item.id);
+                                showPushBanner('approved', custName, phone, '', '', item.id, item.title, item.message);
+                            }
+                            actionHtml = `
+                                <div class="pt-1.5 flex items-center gap-1 text-[10px] text-emerald-700 font-semibold">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Pendaftaran Disetujui (Siap Pasang)</span>
+                                </div>
+                            `;
+                        } else if (item.type === 'registration_filled') {
+                            if (!item.is_read && !notifiedIds.has(item.id)) {
+                                notifiedIds.add(item.id);
+                                showPushBanner('filled', custName, phone, '', '', item.id, item.title, item.message);
+                            }
+                            actionHtml = `
+                                <div class="pt-1.5 flex items-center gap-1 text-[10px] text-indigo-700 font-semibold">
+                                    <i class="fa-solid fa-clock"></i>
+                                    <span>Menunggu Verifikasi C-Care</span>
                                 </div>
                             `;
                         }
 
+                        let cardBorder = item.is_read ? 'border-gray-200 bg-white' : 'border-amber-300 bg-amber-50/50';
+                        let titleColor = item.is_read ? 'text-[#333333]' : 'text-amber-800';
+                        if (item.type === 'registration_revision') {
+                            cardBorder = item.is_read ? 'border-gray-200 bg-white' : 'border-rose-300 bg-rose-50/60';
+                            titleColor = item.is_read ? 'text-[#333333]' : 'text-rose-800';
+                        } else if (item.type === 'survey_verified') {
+                            cardBorder = item.is_read ? 'border-gray-200 bg-white' : 'border-emerald-300 bg-emerald-50/60';
+                            titleColor = item.is_read ? 'text-[#333333]' : 'text-emerald-800';
+                        }
+
                         html += `
-                            <div class="p-3 rounded-2xl bg-white border ${item.is_read ? 'border-gray-200' : 'border-amber-300 bg-amber-50/50'} shadow-sm space-y-1.5">
-                                <div class="flex items-center justify-between text-[11px] font-bold ${item.is_read ? 'text-[#333333]' : 'text-amber-800'}">
+                            <div class="p-3 rounded-2xl border ${cardBorder} shadow-sm space-y-1.5 transition-all">
+                                <div class="flex items-center justify-between text-[11px] font-bold ${titleColor}">
                                     <span class="flex items-center gap-1.5">
-                                        ${!item.is_read ? '<span class="w-2 h-2 rounded-full bg-rose-500"></span>' : ''}
+                                        ${!item.is_read ? '<span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>' : ''}
                                         ${item.title}
                                     </span>
                                     <span class="text-[9px] font-normal text-gray-400">${new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
@@ -884,17 +951,73 @@
             }
         }
 
-        function showPushBanner(name, phone, text, link, notifId) {
-            currentPushData = { name, phone, text, link, notifId };
-            document.getElementById('pushBannerTitle').innerText = 'Survey ' + name + ' Terverifikasi!';
-            document.getElementById('pushBannerMsg').innerText = 'OPJ telah memverifikasi lokasi. Klik untuk bagikan link WhatsApp!';
+        function showPushBanner(type, name, phone, text, link, notifId, title, msg, extra = '') {
+            currentPushData = { type, name, phone, text, link, notifId };
             const banner = document.getElementById('pushBanner');
+            const iconBox = document.getElementById('pushBannerIcon');
+            const dot = document.getElementById('pushBannerDot');
+            const titleEl = document.getElementById('pushBannerTitle');
+            const msgEl = document.getElementById('pushBannerMsg');
+            const btn = document.getElementById('pushBannerBtn');
+            const btnText = document.getElementById('pushBannerBtnText');
+
+            banner.className = 'mx-3 mt-2.5 bg-white/95 backdrop-blur-md rounded-2xl p-3 shadow-xl transition-all duration-300 cursor-pointer animate-pulse z-40';
+
+            if (type === 'revision') {
+                banner.classList.add('border-2', 'border-rose-500');
+                iconBox.className = 'w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center text-sm shadow-sm shrink-0';
+                iconBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-base"></i>';
+                dot.className = 'w-2 h-2 rounded-full bg-rose-500 animate-ping';
+                titleEl.innerText = title || ('Revisi: ' + name);
+                msgEl.innerText = msg || 'Pengajuan memerlukan revisi dari C-Care. Klik untuk kirim pesan ke WhatsApp pelanggan!';
+                btn.className = 'mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-[10px] shadow-xs';
+                btnText.innerText = 'Kirim Revisi via WA';
+            } else if (type === 'approved') {
+                banner.classList.add('border-2', 'border-emerald-500');
+                iconBox.className = 'w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-sm shadow-sm shrink-0';
+                iconBox.innerHTML = '<i class="fa-solid fa-circle-check text-base"></i>';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-ping';
+                titleEl.innerText = title || ('Approved: ' + name);
+                msgEl.innerText = msg || 'Pengajuan telah disetujui C-Care.';
+                btn.className = 'mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-xs';
+                btnText.innerText = 'Tandai Dibaca';
+            } else if (type === 'filled') {
+                banner.classList.add('border-2', 'border-indigo-500');
+                iconBox.className = 'w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-sm shadow-sm shrink-0';
+                iconBox.innerHTML = '<i class="fa-solid fa-file-circle-check text-base"></i>';
+                dot.className = 'w-2 h-2 rounded-full bg-indigo-500 animate-ping';
+                titleEl.innerText = title || ('Form Diisi: ' + name);
+                msgEl.innerText = msg || 'Pelanggan telah mengisi formulir online.';
+                btn.className = 'mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[10px] shadow-xs';
+                btnText.innerText = 'Lihat Status';
+            } else {
+                // Default verified / share_whatsapp
+                banner.classList.add('border-2', 'border-emerald-500');
+                iconBox.className = 'w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-sm shadow-sm shrink-0';
+                iconBox.innerHTML = '<i class="fa-brands fa-whatsapp text-lg"></i>';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-ping';
+                titleEl.innerText = title || ('Survey ' + name + ' Terverifikasi!');
+                msgEl.innerText = msg || 'OPJ telah memverifikasi lokasi. Klik untuk bagikan link WhatsApp!';
+                btn.className = 'mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-xs';
+                btnText.innerText = 'Bagikan Link WA Sekarang';
+            }
+
             banner.classList.remove('hidden');
         }
 
         function handlePushBannerClick() {
             if (currentPushData) {
-                openWaModal(currentPushData.name, currentPushData.phone, currentPushData.text, currentPushData.link, currentPushData.notifId);
+                if (currentPushData.type === 'verified' || currentPushData.type === 'revision') {
+                    openWaModal(currentPushData.name, currentPushData.phone, currentPushData.text, currentPushData.link, currentPushData.notifId, currentPushData.type);
+                } else if (currentPushData.notifId) {
+                    fetch(`/api/notifications/${currentPushData.notifId}/read`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+                    }).then(() => {
+                        loadMyNotifications(true);
+                        switchTab('history');
+                    }).catch(() => {});
+                }
                 closePushBanner();
             }
         }
@@ -903,18 +1026,36 @@
             document.getElementById('pushBanner').classList.add('hidden');
         }
 
-        function openWaModal(name, phone, text, link, notifId = null) {
+        function openWaModal(name, phone, text, link, notifId = null, type = 'verified', reason = '') {
             if (notifId) {
-                fetch(`/api/sales/notifications/${notifId}/read`, {
+                fetch(`/api/notifications/${notifId}/read`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
                 }).then(() => loadMyNotifications(true)).catch(() => {});
             }
+
+            const header = document.getElementById('waModalHeader');
+            const title = document.getElementById('waModalTitle');
+            const sub = document.getElementById('waModalSub');
+            const directBtn = document.getElementById('waDirectLink');
+
+            if (type === 'revision') {
+                header.className = 'flex items-center gap-2 font-bold text-rose-600 text-sm';
+                title.innerText = 'Kirim Link Revisi Data ke Pelanggan';
+                sub.innerText = `Kirimkan rincian revisi dokumen kepada ${name} (${phone || 'Pelanggan'}):`;
+                directBtn.className = 'px-4 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 inline-flex items-center gap-1.5 transition-colors';
+            } else {
+                header.className = 'flex items-center gap-2 font-bold text-emerald-600 text-sm';
+                title.innerText = 'Bagikan Link WA ke Pelanggan';
+                sub.innerText = `Pesan WhatsApp resmi akan diteruskan ke nomor ${name} (${phone || 'Pelanggan'}):`;
+                directBtn.className = 'px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 inline-flex items-center gap-1.5 transition-colors';
+            }
+
             document.getElementById('waMessagePreview').innerText = text;
-            const cleanPhone = phone.replace(/[^0-9]/g, '');
+            const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
             const finalPhone = cleanPhone.startsWith('0') ? '62' + cleanPhone.substring(1) : cleanPhone;
             const waUrl = `https://api.whatsapp.com/send?phone=${finalPhone}&text=${encodeURIComponent(text)}`;
-            document.getElementById('waDirectLink').href = waUrl;
+            directBtn.href = waUrl;
             document.getElementById('waModal').classList.remove('hidden');
         }
 

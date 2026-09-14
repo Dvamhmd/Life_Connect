@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/customers/{id}', [CCareController::class, 'show'])->name('show');
         Route::post('/customers/{id}/approve', [CCareController::class, 'approve'])->name('approve');
         Route::post('/customers/{id}/reject', [CCareController::class, 'reject'])->name('reject');
+        Route::post('/customers/{id}/resend-revision', [CCareController::class, 'resendRevision'])->name('resendRevision');
     });
 
     // 3. Admin Sales Dashboard (Progress Tracker & SLA Evaluation)

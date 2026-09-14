@@ -174,8 +174,16 @@ class MobileSimulatorController extends Controller
 
     public function apiGetSurveys(Request $request, $salesId)
     {
+        $user = is_numeric($salesId) ? User::find($salesId) : User::where('sales_id', $salesId)->first();
         $surveys = CustomerRegistration::with('package')
-            ->where('sales_user_id', $salesId)
+            ->where(function ($q) use ($salesId, $user) {
+                if (is_numeric($salesId)) {
+                    $q->where('sales_user_id', $salesId);
+                }
+                if ($user && $user->sales_id) {
+                    $q->orWhere('sales_am_id', $user->sales_id);
+                }
+            })
             ->latest('submitted_at')
             ->get();
 
@@ -187,15 +195,17 @@ class MobileSimulatorController extends Controller
 
     public function apiGetNotifications(Request $request, $salesId)
     {
-        $user = User::find($salesId);
+        $user = is_numeric($salesId) ? User::find($salesId) : User::where('sales_id', $salesId)->first();
         $notifications = Notification::with('registration')
-            ->where('user_id', $salesId)
-            ->orWhere(function ($q) use ($user) {
+            ->where(function ($q) use ($salesId, $user) {
+                if (is_numeric($salesId)) {
+                    $q->where('user_id', $salesId);
+                }
                 if ($user && $user->sales_id) {
-                    $q->where('sales_am_id', $user->sales_id);
+                    $q->orWhere('sales_am_id', $user->sales_id);
                 }
             })
-            ->latest('created_at')
+            ->latest('id')
             ->get();
 
         return response()->json([

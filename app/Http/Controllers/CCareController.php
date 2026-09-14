@@ -7,6 +7,7 @@ use App\Models\CustomerRegistration;
 use App\Models\RegistrationProgressLog;
 use App\Models\AuditLog;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class CCareController extends Controller
@@ -147,9 +148,16 @@ class CCareController extends Controller
         );
 
         // Notify Sales AM
+        $salesUserId = $registration->sales_user_id;
+        $salesAmId = $registration->sales_am_id;
+        if (!$salesUserId && $salesAmId) {
+            $salesUser = User::where('sales_id', $salesAmId)->first();
+            $salesUserId = $salesUser?->id;
+        }
+
         Notification::create([
-            'user_id' => $registration->sales_user_id,
-            'sales_am_id' => $registration->sales_am_id,
+            'user_id' => $salesUserId,
+            'sales_am_id' => $salesAmId,
             'title' => 'Pengajuan Pelanggan Disetujui (Approved)!',
             'message' => "Selamat! Pengajuan pelanggan {$registration->customer_name} ({$registration->registration_code}) telah disetujui (Approved) oleh C-Care.",
             'type' => 'registration_approved',
@@ -213,11 +221,18 @@ class CCareController extends Controller
         );
 
         // Notify Sales AM to follow up
+        $salesUserId = $registration->sales_user_id;
+        $salesAmId = $registration->sales_am_id;
+        if (!$salesUserId && $salesAmId) {
+            $salesUser = User::where('sales_id', $salesAmId)->first();
+            $salesUserId = $salesUser?->id;
+        }
+
         Notification::create([
-            'user_id' => $registration->sales_user_id,
-            'sales_am_id' => $registration->sales_am_id,
+            'user_id' => $salesUserId,
+            'sales_am_id' => $salesAmId,
             'title' => 'Pengajuan Memerlukan Revisi (Revision)',
-            'message' => "Pengajuan {$registration->customer_name} ({$registration->registration_code}) membutuhkan revisi. Catatan C-Care: {$request->rejection_notes}. Mohon segera follow up ke pelanggan.",
+            'message' => "Pengajuan {$registration->customer_name} ({$registration->registration_code}) membutuhkan revisi [{$request->rejection_category}]. Catatan C-Care: {$request->rejection_notes}. Mohon segera follow up ke pelanggan.",
             'type' => 'registration_revision',
             'customer_registration_id' => $registration->id,
             'link' => route('customer-form.show', $registration->token),
@@ -227,5 +242,83 @@ class CCareController extends Controller
         ]);
 
         return redirect()->route('ccare.index')->with('warning', "Pengajuan {$registration->customer_name} telah diubah ke status REVISI. Catatan dan notifikasi telah dikirimkan ke Sales untuk tindak lanjut.");
+    }
+
+    public function resendRevision(Request $request, $id)
+    {
+        $request->validate([
+            'reminder_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $registration = CustomerRegistration::findOrFail($id);
+
+        if ($registration->status !== 'revision') {
+            return back()->with('error', 'Kirim ulang notifikasi revisi hanya dapat dilakukan untuk pengajuan yang berstatus Revisi.');
+        }
+
+        $user = Auth::user();
+        $now = now();
+        $reminderNotes = trim((string) $request->input('reminder_notes'));
+        $category = $registration->rejection_category ?: 'Perbaikan Dokumen';
+        $baseNotes = $registration->rejection_notes ?: 'Mohon segera lakukan revisi data/dokumen calon pelanggan.';
+
+        // Build notification message for Sales
+        $message = "Pengingat Revisi: Pengajuan {$registration->customer_name} ({$registration->registration_code}) masih membutuhkan tindak lanjut revisi [{$category}]. Catatan C-Care: {$baseNotes}";
+        if (!empty($reminderNotes)) {
+            $message .= " | Catatan Pengingat: {$reminderNotes}";
+        }
+        $message .= ". Mohon segera follow up ke pelanggan.";
+
+        // Progress Log
+        $logNotes = "Kirim Ulang Notifikasi Pengingat Revisi ke Sales {$registration->sales_name} ({$registration->sales_am_id}).";
+        if (!empty($reminderNotes)) {
+            $logNotes .= " Catatan Tambahan: {$reminderNotes}";
+        }
+
+        RegistrationProgressLog::create([
+            'customer_registration_id' => $registration->id,
+            'user_id' => $user->id,
+            'actor_name' => $user->name,
+            'actor_role' => 'C-Care',
+            'from_status' => 'revision',
+            'to_status' => 'revision',
+            'notes' => $logNotes,
+            'duration_seconds' => null,
+            'created_at' => $now,
+        ]);
+
+        // Audit Log
+        AuditLog::log(
+            action: 'RESEND_REVISION_NOTIFICATION',
+            module: 'CCare',
+            description: "C-Care {$user->name} mengirim ulang notifikasi pengingat revisi untuk pendaftaran {$registration->customer_name} ({$registration->registration_code}) ke Sales {$registration->sales_name}." . (!empty($reminderNotes) ? " Pesan: {$reminderNotes}" : ""),
+            targetType: 'CustomerRegistration',
+            targetId: $registration->id,
+            oldValues: ['status' => 'revision'],
+            newValues: ['status' => 'revision', 'reminder_notes' => $reminderNotes]
+        );
+
+        // Notify Sales AM
+        $salesUserId = $registration->sales_user_id;
+        $salesAmId = $registration->sales_am_id;
+        if (!$salesUserId && $salesAmId) {
+            $salesUser = User::where('sales_id', $salesAmId)->first();
+            $salesUserId = $salesUser?->id;
+        }
+
+        Notification::create([
+            'user_id' => $salesUserId,
+            'sales_am_id' => $salesAmId,
+            'title' => 'Pengingat: Revisi Data Pengajuan Diperlukan',
+            'message' => $message,
+            'type' => 'registration_revision',
+            'customer_registration_id' => $registration->id,
+            'link' => route('customer-form.show', $registration->token),
+            'action_type' => 'revise_data',
+            'is_read' => false,
+            'created_at' => $now,
+        ]);
+
+        return back()->with('success', "Notifikasi pengingat revisi berhasil dikirim ulang ke Sales ({$registration->sales_name}).");
     }
 }

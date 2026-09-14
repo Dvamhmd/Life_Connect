@@ -42,6 +42,87 @@
             }
         }
     </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; color: #333333; }
+        
+        @keyframes naturalBounce {
+            0%, 15%, 85%, 100% {
+                transform: translateY(0) scale(1, 1);
+            }
+            18% {
+                /* Anticipation */
+                transform: translateY(2px) scale(1.12, 0.88);
+            }
+            30% {
+                /* Launching upwards */
+                transform: translateY(-22px) scale(0.92, 1.08);
+            }
+            42% {
+                /* Apex (gravity slow point) */
+                transform: translateY(-26px) scale(1, 1);
+            }
+            54% {
+                /* Floor impact squash */
+                transform: translateY(0) scale(1.18, 0.82);
+            }
+            64% {
+                /* Second small rebound */
+                transform: translateY(-10px) scale(0.96, 1.04);
+            }
+            74% {
+                /* Second landing */
+                transform: translateY(0) scale(1.06, 0.94);
+            }
+            80% {
+                /* Subtle settle */
+                transform: translateY(-2px) scale(0.99, 1.01);
+            }
+        }
+
+        @keyframes naturalShadow {
+            0%, 15%, 85%, 100% {
+                transform: scale(1);
+                opacity: 0.35;
+            }
+            18% {
+                transform: scale(1.12);
+                opacity: 0.45;
+            }
+            30% {
+                transform: scale(0.7);
+                opacity: 0.18;
+            }
+            42% {
+                transform: scale(0.55);
+                opacity: 0.12;
+            }
+            54% {
+                transform: scale(1.2);
+                opacity: 0.5;
+            }
+            64% {
+                transform: scale(0.8);
+                opacity: 0.22;
+            }
+            74% {
+                transform: scale(1.06);
+                opacity: 0.4;
+            }
+            80% {
+                transform: scale(0.98);
+                opacity: 0.33;
+            }
+        }
+
+        .animate-tuing {
+            animation: naturalBounce 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+            transform-origin: bottom center;
+        }
+
+        .animate-shadow {
+            animation: naturalShadow 2.2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+        }
+    </style>
 </head>
 <body class="min-h-full bg-[#F8F9FA] text-[#333333] flex items-center justify-center p-4 selection:bg-[#F48C5B] selection:text-white">
 
@@ -53,9 +134,12 @@
             </div>
         </div>
 
-        <!-- Success Animation Icon -->
-        <div class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-2xl mx-auto shadow-lg shadow-emerald-500/10">
-            <i class="fa-solid fa-circle-check"></i>
+        <!-- Success Animation Icon with Solid Green & Natural Bounce -->
+        <div class="relative flex flex-col items-center justify-center mx-auto pt-2 pb-1">
+            <div class="animate-tuing w-20 h-20 rounded-full bg-emerald-500 text-white flex items-center justify-center text-3xl sm:text-4xl shadow-lg shadow-emerald-500/25 border-4 border-emerald-100">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div class="animate-shadow w-14 h-2.5 bg-emerald-950/20 rounded-full blur-[2px] mt-2"></div>
         </div>
 
         <div class="space-y-2">
@@ -88,7 +172,7 @@
                 <div class="flex justify-between">
                     <span class="text-gray-500">Status Saat Ini:</span>
                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                        Filled (Menunggu Review C-Care)
+                        Filled
                     </span>
                 </div>
             </div>
@@ -99,7 +183,7 @@
                     <span>Langkah Selanjutnya:</span>
                 </div>
                 <p class="leading-relaxed">
-                    Tim Customer Care (C-Care) LifeMedia akan melakukan review berkas KTP dan persetujuan berlangganan. Anda akan menerima pesan konfirmasi WhatsApp dan informasi jadwal teknisi instalasi.
+                    Kami akan melakukan review berkas. Silahkan tunggu pesan konfirmasi WhatsApp dari Sales kami.
                 </p>
             </div>
         </div>

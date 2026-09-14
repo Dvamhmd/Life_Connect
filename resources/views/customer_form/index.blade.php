@@ -58,6 +58,10 @@
             object-fit: cover;
             border-radius: 0.75rem;
         }
+        select {
+            min-width: 0;
+            max-width: 100%;
+        }
     </style>
 </head>
 <body class="min-h-full bg-[#F8F9FA] text-[#333333] antialiased flex flex-col selection:bg-[#F48C5B] selection:text-white pb-16">
@@ -196,7 +200,7 @@
                     </div>
                     <div class="min-w-0">
                         <div class="text-[9px] text-gray-400 uppercase font-mono tracking-wider">Langkah 5</div>
-                        <div class="text-xs font-bold text-gray-600 truncate">Tanda Tangan</div>
+                        <div class="text-xs font-bold text-gray-600 truncate">Persetujuan</div>
                     </div>
                 </button>
             </div>
@@ -434,8 +438,8 @@
                         <div id="box_services_selection" class="grid grid-cols-1 md:grid-cols-3 gap-4 transition-all">
 
                             <!-- 1. TV KABEL -->
-                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between">
-                                <div>
+                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between min-w-0 overflow-hidden">
+                                <div class="min-w-0 w-full">
                                     <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
                                         <div class="w-8 h-8 rounded-xl bg-orange-50 text-[#F48C5B] border border-orange-100 flex items-center justify-center font-bold text-sm shadow-2xs">
                                             <i class="fa-solid fa-tv"></i>
@@ -446,31 +450,31 @@
                                         </div>
                                     </div>
 
-                                    <div class="space-y-2.5 mt-3">
+                                    <div class="space-y-2.5 mt-3 min-w-0 w-full">
                                         <!-- Checkbox 1 + Textfield -->
-                                        <div class="flex items-center gap-2.5">
+                                        <div class="flex items-center gap-2 min-w-0 w-full">
                                             <input type="checkbox" name="services[tv_kabel][opt1]" id="tv_opt1" value="1" {{ $tvOpt1 ? 'checked' : '' }}
                                                    class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
                                             <input type="text" name="services[tv_kabel][text1]" id="tv_text1" value="{{ $tvText1 }}"
                                                    placeholder="Catatan / Paket 1..." autocomplete="off"
-                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                                   class="w-0 min-w-0 flex-1 px-2.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
                                         </div>
 
                                         <!-- Checkbox 2 + Textfield -->
-                                        <div class="flex items-center gap-2.5">
+                                        <div class="flex items-center gap-2 min-w-0 w-full">
                                             <input type="checkbox" name="services[tv_kabel][opt2]" id="tv_opt2" value="1" {{ $tvOpt2 ? 'checked' : '' }}
                                                    class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
                                             <input type="text" name="services[tv_kabel][text2]" id="tv_text2" value="{{ $tvText2 }}"
                                                    placeholder="Catatan / Paket 2..." autocomplete="off"
-                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                                   class="w-0 min-w-0 flex-1 px-2.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- 2. INTERNET -->
-                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between">
-                                <div>
+                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between min-w-0 overflow-hidden">
+                                <div class="min-w-0 w-full">
                                     <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
                                         <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-bold text-sm shadow-2xs">
                                             <i class="fa-solid fa-wifi"></i>
@@ -481,31 +485,41 @@
                                         </div>
                                     </div>
 
-                                    <div class="space-y-2.5 mt-3">
-                                        <!-- Checkbox 1 + Textfield -->
-                                        <div class="flex items-center gap-2.5">
+                                    <div class="space-y-2.5 mt-3 min-w-0 w-full">
+                                        <!-- Checkbox 1 + Dropdown -->
+                                        <div class="flex items-center gap-2 min-w-0 w-full">
                                             <input type="checkbox" name="services[internet][opt1]" id="net_opt1" value="1" {{ $netOpt1 ? 'checked' : '' }}
                                                    class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
-                                            <input type="text" name="services[internet][text1]" id="net_text1" value="{{ $netText1 }}"
-                                                   placeholder="Kecepatan / Paket 1..." autocomplete="off"
-                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                            <select name="services[internet][text1]" id="net_text1"
+                                                    class="w-0 min-w-0 flex-1 px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors cursor-pointer truncate">
+                                                <option value="" {{ empty($netText1) ? 'selected' : '' }}>-- Pilih Paket Internet --</option>
+                                                <option value="izzi life 30 - Rp 166.500/bulan" {{ $netText1 == 'izzi life 30 - Rp 166.500/bulan' ? 'selected' : '' }}>izzi life 30 - Rp 166.500/bulan</option>
+                                                <option value="izzi life 50 - Rp 277.500/bulan" {{ $netText1 == 'izzi life 50 - Rp 277.500/bulan' ? 'selected' : '' }}>izzi life 50 - Rp 277.500/bulan</option>
+                                                <option value="izzi life 100 - Rp 388.500/bulan" {{ $netText1 == 'izzi life 100 - Rp 388.500/bulan' ? 'selected' : '' }}>izzi life 100 - Rp 388.500/bulan</option>
+                                                <option value="izzi life 200 - Rp 666.000/bulan" {{ $netText1 == 'izzi life 200 - Rp 666.000/bulan' ? 'selected' : '' }}>izzi life 200 - Rp 666.000/bulan</option>
+                                            </select>
                                         </div>
 
-                                        <!-- Checkbox 2 + Textfield -->
-                                        <div class="flex items-center gap-2.5">
+                                        <!-- Checkbox 2 + Dropdown -->
+                                        <div class="flex items-center gap-2 min-w-0 w-full">
                                             <input type="checkbox" name="services[internet][opt2]" id="net_opt2" value="1" {{ $netOpt2 ? 'checked' : '' }}
                                                    class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
-                                            <input type="text" name="services[internet][text2]" id="net_text2" value="{{ $netText2 }}"
-                                                   placeholder="Kecepatan / Paket 2..." autocomplete="off"
-                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                            <select name="services[internet][text2]" id="net_text2"
+                                                    class="w-0 min-w-0 flex-1 px-2 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors cursor-pointer truncate">
+                                                <option value="" {{ empty($netText2) ? 'selected' : '' }}>-- Pilih Paket Tambahan --</option>
+                                                <option value="izzi life 30 - Rp 166.500/bulan" {{ $netText2 == 'izzi life 30 - Rp 166.500/bulan' ? 'selected' : '' }}>izzi life 30 - Rp 166.500/bulan</option>
+                                                <option value="izzi life 50 - Rp 277.500/bulan" {{ $netText2 == 'izzi life 50 - Rp 277.500/bulan' ? 'selected' : '' }}>izzi life 50 - Rp 277.500/bulan</option>
+                                                <option value="izzi life 100 - Rp 388.500/bulan" {{ $netText2 == 'izzi life 100 - Rp 388.500/bulan' ? 'selected' : '' }}>izzi life 100 - Rp 388.500/bulan</option>
+                                                <option value="izzi life 200 - Rp 666.000/bulan" {{ $netText2 == 'izzi life 200 - Rp 666.000/bulan' ? 'selected' : '' }}>izzi life 200 - Rp 666.000/bulan</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- 3. TELEPON -->
-                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between">
-                                <div>
+                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between min-w-0 overflow-hidden">
+                                <div class="min-w-0 w-full">
                                     <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
                                         <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold text-sm shadow-2xs">
                                             <i class="fa-solid fa-phone"></i>
@@ -516,23 +530,23 @@
                                         </div>
                                     </div>
 
-                                    <div class="space-y-2.5 mt-3">
+                                    <div class="space-y-2.5 mt-3 min-w-0 w-full">
                                         <!-- Checkbox 1 + Textfield -->
-                                        <div class="flex items-center gap-2.5">
+                                        <div class="flex items-center gap-2 min-w-0 w-full">
                                             <input type="checkbox" name="services[telepon][opt1]" id="tel_opt1" value="1" {{ $telOpt1 ? 'checked' : '' }}
                                                    class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
                                             <input type="text" name="services[telepon][text1]" id="tel_text1" value="{{ $telText1 }}"
                                                    placeholder="Nomor / Paket 1..." autocomplete="off"
-                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                                   class="w-0 min-w-0 flex-1 px-2.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
                                         </div>
 
                                         <!-- Checkbox 2 + Textfield -->
-                                        <div class="flex items-center gap-2.5">
+                                        <div class="flex items-center gap-2 min-w-0 w-full">
                                             <input type="checkbox" name="services[telepon][opt2]" id="tel_opt2" value="1" {{ $telOpt2 ? 'checked' : '' }}
                                                    class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
                                             <input type="text" name="services[telepon][text2]" id="tel_text2" value="{{ $telText2 }}"
                                                    placeholder="Nomor / Paket 2..." autocomplete="off"
-                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                                   class="w-0 min-w-0 flex-1 px-2.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
                                         </div>
                                     </div>
                                 </div>
@@ -581,7 +595,6 @@
                         </div>
                         <div>
                             <h3 class="text-base font-extrabold text-[#2C2C2C]">Informasi Penagihan</h3>
-                            <p class="text-xs text-gray-500">Detail penerima invoice tagihan bulanan dan kontak konfirmasi</p>
                         </div>
                     </div>
 
@@ -593,7 +606,7 @@
                                 Nama Penerima <span class="text-rose-500">*</span>
                             </label>
                             <input type="text" name="billing_name" id="billing_name" required
-                                   value="{{ old('billing_name', $registration->billing_name ?: $registration->customer_name) }}"
+                                   value="{{ old('billing_name', $registration->billing_name) }}"
                                    placeholder="Nama penerima / penanggung jawab tagihan..."
                                    class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] font-medium transition-colors">
                             <p id="err_billing_name" class="field-error-text text-rose-500 text-[11px] font-semibold mt-1 hidden flex items-center gap-1.5">
@@ -608,7 +621,7 @@
                                 Email Penagihan (e-Invoice) <span class="text-rose-500">*</span>
                             </label>
                             <input type="email" name="billing_email" id="billing_email" required
-                                   value="{{ old('billing_email', $registration->billing_email ?: $registration->email) }}"
+                                   value="{{ old('billing_email', $registration->billing_email) }}"
                                    placeholder="email.penagihan@gmail.com"
                                    class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
                             <p id="err_billing_email" class="field-error-text text-rose-500 text-[11px] font-semibold mt-1 hidden flex items-center gap-1.5">
@@ -623,7 +636,7 @@
                                 No. Telepon <span class="text-gray-400 font-normal">(Opsional)</span>
                             </label>
                             <input type="text" name="billing_phone" id="billing_phone"
-                                   value="{{ old('billing_phone', $registration->billing_phone ?: $registration->phone_telp) }}"
+                                   value="{{ old('billing_phone', $registration->billing_phone) }}"
                                    placeholder="Contoh: 0274-123456"
                                    class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
                         </div>
@@ -634,7 +647,7 @@
                                 No. HP Penagihan <span class="text-rose-500">*</span>
                             </label>
                             <input type="tel" name="billing_mobile" id="billing_mobile" required
-                                   value="{{ old('billing_mobile', $registration->billing_mobile ?: $registration->phone_wa) }}"
+                                   value="{{ old('billing_mobile', $registration->billing_mobile) }}"
                                    placeholder="Contoh: 081234567890"
                                    class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
                             <p id="err_billing_mobile" class="field-error-text text-rose-500 text-[11px] font-semibold mt-1 hidden flex items-center gap-1.5">
@@ -650,7 +663,7 @@
                             </label>
                             <textarea name="billing_address" id="billing_address" rows="2" required
                                       placeholder="Alamat lengkap tujuan pengiriman invoice / surat penagihan..."
-                                      class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] leading-relaxed transition-colors">{{ old('billing_address', $registration->billing_address ?: ($registration->address_detail ?: $registration->full_address)) }}</textarea>
+                                      class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] leading-relaxed transition-colors">{{ old('billing_address', $registration->billing_address) }}</textarea>
                             <p id="err_billing_address" class="field-error-text text-rose-500 text-[11px] font-semibold mt-0.5 hidden flex items-center gap-1.5">
                                 <i class="fa-solid fa-circle-exclamation text-xs"></i>
                                 <span>Alamat penagihan lengkap wajib diisi.</span>
@@ -670,19 +683,18 @@
                         </div>
                         <div>
                             <h3 class="text-base font-extrabold text-[#2C2C2C]">Kelengkapan Dokumen Foto</h3>
-                            <p class="text-xs text-gray-500">Unggah foto fisik dokumen untuk verifikasi keabsahan data registrasi</p>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 text-xs">
                         
                         <!-- 1. Foto KTP Asli -->
-                        <div class="space-y-2" id="wrapper_ktp_photo">
+                        <div class="space-y-1.5" id="wrapper_ktp_photo">
                             <label class="block font-bold text-[#333333]">
                                 Foto KTP Asli <span class="text-rose-500">*</span>
                             </label>
 
-                            <div id="box_ktp_photo" class="relative group border-2 border-dashed border-gray-300 hover:border-[#F48C5B] hover:bg-[#FEF4F0]/20 rounded-2xl p-4 bg-[#F8F9FA] transition-all text-center min-h-[190px] flex flex-col items-center justify-center">
+                            <div id="box_ktp_photo" class="relative group border-2 border-dashed border-gray-300 hover:border-[#F48C5B] hover:bg-[#FEF4F0]/20 rounded-2xl p-3 bg-[#F8F9FA] transition-all text-center min-h-[120px] flex flex-col items-center justify-center">
                                 <input type="file" name="ktp_photo" id="ktp_photo" accept="image/*"
                                        {{ $registration->ktp_photo_path ? '' : 'required' }}
                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -692,23 +704,22 @@
                                 <div id="ktpPreviewBox" class="w-full flex flex-col items-center justify-center {{ $registration->ktp_photo_path ? '' : 'hidden' }}">
                                     <div class="relative w-full rounded-xl overflow-hidden shadow-xs border border-gray-200 bg-white p-1">
                                         <img id="ktpPreviewImg" src="{{ $registration->ktp_photo_path ? asset($registration->ktp_photo_path) : '' }}"
-                                             alt="Preview Foto KTP" class="w-full h-36 object-contain rounded-lg"
+                                             alt="Preview Foto KTP" class="w-full h-24 sm:h-28 object-contain rounded-lg"
                                              onerror="handleImgError(this, 'ktpPreviewBox', 'ktpPlaceholder')">
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] text-[#F48C5B] font-bold mt-2">
-                                        <i class="fa-solid fa-arrows-rotate"></i> Klik / seret untuk ganti foto
+                                    <span class="inline-flex items-center gap-1 text-[10px] text-[#F48C5B] font-bold mt-1">
+                                        <i class="fa-solid fa-arrows-rotate"></i> Klik untuk ganti foto
                                     </span>
                                 </div>
 
                                 <!-- Upload Placeholder Icon -->
-                                <div id="ktpPlaceholder" class="space-y-2.5 py-2 {{ $registration->ktp_photo_path ? 'hidden' : '' }}">
-                                    <div class="w-14 h-14 mx-auto rounded-2xl bg-[#FEF4F0] border border-[#F48C5B]/30 text-[#F48C5B] flex items-center justify-center text-2xl shadow-xs group-hover:scale-110 transition-transform duration-200">
+                                <div id="ktpPlaceholder" class="space-y-1.5 py-1 {{ $registration->ktp_photo_path ? 'hidden' : '' }}">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/30 text-[#F48C5B] flex items-center justify-center text-lg shadow-xs group-hover:scale-110 transition-transform duration-200">
                                         <i class="fa-solid fa-cloud-arrow-up"></i>
                                     </div>
                                     <div>
                                         <span class="font-extrabold text-[#2C2C2C] block text-xs group-hover:text-[#F48C5B] transition-colors">Unggah Foto KTP</span>
                                         <span class="text-[10px] text-gray-400 block mt-0.5">Klik atau seret file ke sini</span>
-                                        <span class="text-[9px] text-[#F48C5B] font-semibold flex items-center justify-center gap-1 mt-0.5"><i class="fa-solid fa-bolt"></i> Auto WebP & Kompres</span>
                                     </div>
                                 </div>
                             </div>
@@ -719,12 +730,12 @@
                         </div>
 
                         <!-- 2. Foto Rumah / Bangunan -->
-                        <div class="space-y-2" id="wrapper_house_photo">
+                        <div class="space-y-1.5" id="wrapper_house_photo">
                             <label class="block font-bold text-[#333333]">
                                 Foto Rumah / Bangunan <span class="text-rose-500">*</span>
                             </label>
 
-                            <div id="box_house_photo" class="relative group border-2 border-dashed border-gray-300 hover:border-[#F48C5B] hover:bg-[#FEF4F0]/20 rounded-2xl p-4 bg-[#F8F9FA] transition-all text-center min-h-[190px] flex flex-col items-center justify-center">
+                            <div id="box_house_photo" class="relative group border-2 border-dashed border-gray-300 hover:border-[#F48C5B] hover:bg-[#FEF4F0]/20 rounded-2xl p-3 bg-[#F8F9FA] transition-all text-center min-h-[120px] flex flex-col items-center justify-center">
                                 <input type="file" name="house_photo" id="house_photo" accept="image/*"
                                        {{ $registration->house_photo_path ? '' : 'required' }}
                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -734,23 +745,22 @@
                                 <div id="housePreviewBox" class="w-full flex flex-col items-center justify-center {{ $registration->house_photo_path ? '' : 'hidden' }}">
                                     <div class="relative w-full rounded-xl overflow-hidden shadow-xs border border-gray-200 bg-white p-1">
                                         <img id="housePreviewImg" src="{{ $registration->house_photo_path ? asset($registration->house_photo_path) : '' }}"
-                                             alt="Preview Foto Rumah" class="w-full h-36 object-contain rounded-lg"
+                                             alt="Preview Foto Rumah" class="w-full h-24 sm:h-28 object-contain rounded-lg"
                                              onerror="handleImgError(this, 'housePreviewBox', 'housePlaceholder')">
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] text-[#F48C5B] font-bold mt-2">
-                                        <i class="fa-solid fa-arrows-rotate"></i> Klik / seret untuk ganti foto
+                                    <span class="inline-flex items-center gap-1 text-[10px] text-[#F48C5B] font-bold mt-1">
+                                        <i class="fa-solid fa-arrows-rotate"></i> Klik untuk ganti foto
                                     </span>
                                 </div>
 
                                 <!-- Upload Placeholder Icon -->
-                                <div id="housePlaceholder" class="space-y-2.5 py-2 {{ $registration->house_photo_path ? 'hidden' : '' }}">
-                                    <div class="w-14 h-14 mx-auto rounded-2xl bg-[#FEF4F0] border border-[#F48C5B]/30 text-[#F48C5B] flex items-center justify-center text-2xl shadow-xs group-hover:scale-110 transition-transform duration-200">
+                                <div id="housePlaceholder" class="space-y-1.5 py-1 {{ $registration->house_photo_path ? 'hidden' : '' }}">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/30 text-[#F48C5B] flex items-center justify-center text-lg shadow-xs group-hover:scale-110 transition-transform duration-200">
                                         <i class="fa-solid fa-cloud-arrow-up"></i>
                                     </div>
                                     <div>
                                         <span class="font-extrabold text-[#2C2C2C] block text-xs group-hover:text-[#F48C5B] transition-colors">Unggah Foto Rumah</span>
                                         <span class="text-[10px] text-gray-400 block mt-0.5">Tampak depan bangunan</span>
-                                        <span class="text-[9px] text-[#F48C5B] font-semibold flex items-center justify-center gap-1 mt-0.5"><i class="fa-solid fa-bolt"></i> Auto WebP & Kompres</span>
                                     </div>
                                 </div>
                             </div>
@@ -761,12 +771,12 @@
                         </div>
 
                         <!-- 3. Foto Selfie Bersama Sales -->
-                        <div class="space-y-2" id="wrapper_selfie_sales_photo">
+                        <div class="space-y-1.5" id="wrapper_selfie_sales_photo">
                             <label class="block font-bold text-[#333333]">
                                 Foto Selfie Bersama Sales <span class="text-rose-500">*</span>
                             </label>
 
-                            <div id="box_selfie_sales_photo" class="relative group border-2 border-dashed border-gray-300 hover:border-[#F48C5B] hover:bg-[#FEF4F0]/20 rounded-2xl p-4 bg-[#F8F9FA] transition-all text-center min-h-[190px] flex flex-col items-center justify-center">
+                            <div id="box_selfie_sales_photo" class="relative group border-2 border-dashed border-gray-300 hover:border-[#F48C5B] hover:bg-[#FEF4F0]/20 rounded-2xl p-3 bg-[#F8F9FA] transition-all text-center min-h-[120px] flex flex-col items-center justify-center">
                                 <input type="file" name="selfie_sales_photo" id="selfie_sales_photo" accept="image/*"
                                        {{ $registration->selfie_sales_path ? '' : 'required' }}
                                        class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -776,23 +786,22 @@
                                 <div id="selfiePreviewBox" class="w-full flex flex-col items-center justify-center {{ $registration->selfie_sales_path ? '' : 'hidden' }}">
                                     <div class="relative w-full rounded-xl overflow-hidden shadow-xs border border-gray-200 bg-white p-1">
                                         <img id="selfiePreviewImg" src="{{ $registration->selfie_sales_path ? asset($registration->selfie_sales_path) : '' }}"
-                                             alt="Preview Selfie Sales" class="w-full h-36 object-contain rounded-lg"
+                                             alt="Preview Selfie Sales" class="w-full h-24 sm:h-28 object-contain rounded-lg"
                                              onerror="handleImgError(this, 'selfiePreviewBox', 'selfiePlaceholder')">
                                     </div>
-                                    <span class="inline-flex items-center gap-1 text-[11px] text-[#F48C5B] font-bold mt-2">
-                                        <i class="fa-solid fa-arrows-rotate"></i> Klik / seret untuk ganti foto
+                                    <span class="inline-flex items-center gap-1 text-[10px] text-[#F48C5B] font-bold mt-1">
+                                        <i class="fa-solid fa-arrows-rotate"></i> Klik untuk ganti foto
                                     </span>
                                 </div>
 
                                 <!-- Upload Placeholder Icon -->
-                                <div id="selfiePlaceholder" class="space-y-2.5 py-2 {{ $registration->selfie_sales_path ? 'hidden' : '' }}">
-                                    <div class="w-14 h-14 mx-auto rounded-2xl bg-[#FEF4F0] border border-[#F48C5B]/30 text-[#F48C5B] flex items-center justify-center text-2xl shadow-xs group-hover:scale-110 transition-transform duration-200">
+                                <div id="selfiePlaceholder" class="space-y-1.5 py-1 {{ $registration->selfie_sales_path ? 'hidden' : '' }}">
+                                    <div class="w-10 h-10 mx-auto rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/30 text-[#F48C5B] flex items-center justify-center text-lg shadow-xs group-hover:scale-110 transition-transform duration-200">
                                         <i class="fa-solid fa-cloud-arrow-up"></i>
                                     </div>
                                     <div>
                                         <span class="font-extrabold text-[#2C2C2C] block text-xs group-hover:text-[#F48C5B] transition-colors">Unggah Foto Selfie</span>
                                         <span class="text-[10px] text-gray-400 block mt-0.5">Bersama Petugas Sales</span>
-                                        <span class="text-[9px] text-[#F48C5B] font-semibold flex items-center justify-center gap-1 mt-0.5"><i class="fa-solid fa-bolt"></i> Auto WebP & Kompres</span>
                                     </div>
                                 </div>
                             </div>
@@ -814,26 +823,26 @@
                             5
                         </div>
                         <div>
-                            <h3 class="text-base font-extrabold text-[#2C2C2C]">Persetujuan Berlangganan &amp; Tanda Tangan</h3>
-                            <p class="text-xs text-gray-500">Bubuhkan tanda tangan Anda secara virtual pada area canvas di bawah</p>
+                            <h3 class="text-base font-extrabold text-[#2C2C2C]">Persetujuan Berlangganan</h3>
+                            <p class="hidden sm:block text-xs text-gray-500">Bubuhkan tanda tangan Anda secara virtual pada area canvas di bawah</p>
                         </div>
                     </div>
 
                     <div class="space-y-4">
                         <!-- Virtual Signature Pad Canvas Container -->
                         <div>
-                            <div class="flex items-center justify-between mb-1.5 text-xs">
-                                <span class="font-bold text-[#333333]">Canvas Tanda Tangan Digital: <span class="text-rose-500">*</span></span>
-                                <button type="button" onclick="clearSignature()" class="text-rose-600 hover:text-rose-700 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer">
-                                    <i class="fa-solid fa-rotate-left"></i> Bersihkan / Ulangi TTD
+                            <div class="flex items-center justify-between mb-1.5 text-xs gap-2">
+                                <span class="font-bold text-[#333333] truncate">Canvas Tanda Tangan Digital: <span class="text-rose-500">*</span></span>
+                                <button type="button" onclick="clearSignature()" class="text-rose-600 hover:text-rose-700 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer shrink-0">
+                                    <i class="fa-solid fa-rotate-left"></i> <span>Bersihkan TTD</span>
                                 </button>
                             </div>
                             
                             <div id="box_signature_pad" class="rounded-2xl border-2 border-dashed border-gray-300 bg-white p-2 overflow-hidden shadow-inner relative transition-colors">
-                                <canvas id="signaturePad" class="w-full h-44 cursor-crosshair bg-white rounded-xl touch-none block"></canvas>
+                                <canvas id="signaturePad" class="w-full h-40 sm:h-44 cursor-crosshair bg-white rounded-xl touch-none block"></canvas>
                                 <input type="hidden" name="signature_data" id="signatureData">
                                 
-                                <div id="signatureGuideText" class="absolute bottom-3 right-4 text-[10px] text-gray-400 pointer-events-none transition-opacity duration-200">
+                                <div id="signatureGuideText" class="absolute bottom-2.5 right-3 left-3 sm:left-auto sm:right-4 text-center sm:text-right text-[10px] text-gray-400 pointer-events-none transition-opacity duration-200">
                                     <i class="fa-solid fa-pen-nib mr-1 text-[#F48C5B]"></i> Gunakan jari / stylus / mouse untuk menandatangani
                                 </div>
                             </div>
@@ -845,10 +854,10 @@
 
                         <!-- Terms Checkbox -->
                         <div class="pt-2" id="wrapper_terms_agreed">
-                            <label class="flex items-start gap-3 cursor-pointer text-xs text-gray-700 leading-relaxed">
+                            <label class="flex items-start gap-2.5 sm:gap-3 cursor-pointer text-xs text-gray-700 leading-relaxed">
                                 <input type="checkbox" name="terms_agreed" id="terms_agreed" value="1" required
-                                       class="w-4 h-4 rounded bg-white border-gray-300 text-[#F48C5B] focus:ring-[#F48C5B] mt-0.5 cursor-pointer">
-                                <span>
+                                       class="w-4 h-4 rounded bg-white border-gray-300 text-[#F48C5B] focus:ring-[#F48C5B] mt-0.5 cursor-pointer shrink-0">
+                                <span class="text-[11px] sm:text-xs text-justify">
                                     Saya menyatakan bahwa seluruh data yang saya isikan adalah benar dan valid. Saya menyetujui seluruh <strong>Syarat &amp; Ketentuan Berlangganan Layanan LifeMedia Fiber</strong> serta bersedia mematuhi kewajiban pembayaran tagihan bulanan. <span class="text-rose-500">*</span>
                                 </span>
                             </label>
@@ -877,7 +886,7 @@
                     <!-- Center / Samping Kiri Tombol Lanjut: Pesan Panduan Pengisian -->
                     <div id="navValidationStatus" class="flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-semibold text-center transition-all bg-amber-50 border border-amber-200/80 text-amber-800 leading-snug">
                         <i id="navStatusIcon" class="fa-solid fa-circle-info text-amber-600 shrink-0 text-xs"></i>
-                        <span id="navStatusText" class="truncate sm:whitespace-normal">Pastikan seluruh kolom wajib (*) terisi</span>
+                        <span id="navStatusText" class="truncate sm:whitespace-normal">Pastikan kolom wajib (*) terisi</span>
                     </div>
 
                     <!-- Right: Tombol Lanjut / Kirim -->
@@ -928,15 +937,18 @@
             "Layanan & Paket",
             "Penagihan",
             "Foto Dokumen",
-            "Tanda Tangan"
+            "Persetujuan"
         ];
         const existingSigPath = @json($registration->signature_path);
         const existingKtpPath = @json($registration->ktp_photo_path);
         const existingHousePath = @json($registration->house_photo_path);
         const existingSelfiePath = @json($registration->selfie_sales_path);
 
+        let isRestoring = false;
+
         // Save form draft data to localStorage
         function saveFormDataToLocal() {
+            if (isRestoring) return;
             try {
                 const formData = {
                     customer_name: document.getElementById('customer_name')?.value || '',
@@ -952,19 +964,19 @@
                     subscription_period: document.getElementById('subscription_period')?.value || '',
 
                     tv_opt1: document.getElementById('tv_opt1')?.checked || false,
-                    tv_text1: document.querySelector('input[name="services[tv_kabel][text1]"]')?.value || '',
+                    tv_text1: document.getElementById('tv_text1')?.value || '',
                     tv_opt2: document.getElementById('tv_opt2')?.checked || false,
-                    tv_text2: document.querySelector('input[name="services[tv_kabel][text2]"]')?.value || '',
+                    tv_text2: document.getElementById('tv_text2')?.value || '',
 
                     net_opt1: document.getElementById('net_opt1')?.checked || false,
-                    net_text1: document.querySelector('input[name="services[internet][text1]"]')?.value || '',
+                    net_text1: document.getElementById('net_text1')?.value || '',
                     net_opt2: document.getElementById('net_opt2')?.checked || false,
-                    net_text2: document.querySelector('input[name="services[internet][text2]"]')?.value || '',
+                    net_text2: document.getElementById('net_text2')?.value || '',
 
                     tel_opt1: document.getElementById('tel_opt1')?.checked || false,
-                    tel_text1: document.querySelector('input[name="services[telepon][text1]"]')?.value || '',
+                    tel_text1: document.getElementById('tel_text1')?.value || '',
                     tel_opt2: document.getElementById('tel_opt2')?.checked || false,
-                    tel_text2: document.querySelector('input[name="services[telepon][text2]"]')?.value || '',
+                    tel_text2: document.getElementById('tel_text2')?.value || '',
 
                     billing_name: document.getElementById('billing_name')?.value || '',
                     billing_email: document.getElementById('billing_email')?.value || '',
@@ -983,6 +995,7 @@
 
         // Restore form draft data from localStorage
         function restoreFormDataFromLocal() {
+            isRestoring = true;
             try {
                 const savedRaw = localStorage.getItem(storageKeyDraft);
                 if (!savedRaw) return;
@@ -991,26 +1004,26 @@
 
                 const setVal = (id, val) => {
                     const el = document.getElementById(id);
-                    if (el && val !== undefined && val !== null && val !== '') {
+                    if (el && val !== undefined && val !== null) {
                         el.value = val;
                     }
                 };
 
-                setVal('customer_name', saved.customer_name);
-                setVal('brand_name', saved.brand_name);
-                setVal('identity_number', saved.identity_number);
-                setVal('birth_date', saved.birth_date);
-                setVal('phone_telp', saved.phone_telp);
-                setVal('phone_wa', saved.phone_wa);
-                setVal('email', saved.email);
-                setVal('address_detail', saved.address_detail);
-                setVal('subscription_period', saved.subscription_period);
+                if (saved.customer_name !== undefined) setVal('customer_name', saved.customer_name);
+                if (saved.brand_name !== undefined) setVal('brand_name', saved.brand_name);
+                if (saved.identity_number !== undefined) setVal('identity_number', saved.identity_number);
+                if (saved.birth_date !== undefined) setVal('birth_date', saved.birth_date);
+                if (saved.phone_telp !== undefined) setVal('phone_telp', saved.phone_telp);
+                if (saved.phone_wa !== undefined) setVal('phone_wa', saved.phone_wa);
+                if (saved.email !== undefined) setVal('email', saved.email);
+                if (saved.address_detail !== undefined) setVal('address_detail', saved.address_detail);
+                if (saved.subscription_period !== undefined) setVal('subscription_period', saved.subscription_period);
 
-                setVal('billing_name', saved.billing_name);
-                setVal('billing_email', saved.billing_email);
-                setVal('billing_phone', saved.billing_phone);
-                setVal('billing_mobile', saved.billing_mobile);
-                setVal('billing_address', saved.billing_address);
+                if (saved.billing_name !== undefined) setVal('billing_name', saved.billing_name);
+                if (saved.billing_email !== undefined) setVal('billing_email', saved.billing_email);
+                if (saved.billing_phone !== undefined) setVal('billing_phone', saved.billing_phone);
+                if (saved.billing_mobile !== undefined) setVal('billing_mobile', saved.billing_mobile);
+                if (saved.billing_address !== undefined) setVal('billing_address', saved.billing_address);
 
                 // Restore Radios
                 if (saved.identity_type) {
@@ -1033,43 +1046,51 @@
                     const cb = document.getElementById('tv_opt1');
                     if (cb) cb.checked = !!saved.tv_opt1;
                 }
-                const tvText1 = document.querySelector('input[name="services[tv_kabel][text1]"]');
-                if (tvText1 && saved.tv_text1 !== undefined && saved.tv_text1 !== '') tvText1.value = saved.tv_text1;
+                if (saved.tv_text1 !== undefined) setVal('tv_text1', saved.tv_text1);
 
                 if (saved.tv_opt2 !== undefined) {
                     const cb = document.getElementById('tv_opt2');
                     if (cb) cb.checked = !!saved.tv_opt2;
                 }
-                const tvText2 = document.querySelector('input[name="services[tv_kabel][text2]"]');
-                if (tvText2 && saved.tv_text2 !== undefined && saved.tv_text2 !== '') tvText2.value = saved.tv_text2;
+                if (saved.tv_text2 !== undefined) setVal('tv_text2', saved.tv_text2);
 
                 if (saved.net_opt1 !== undefined) {
                     const cb = document.getElementById('net_opt1');
                     if (cb) cb.checked = !!saved.net_opt1;
                 }
-                const netText1 = document.querySelector('input[name="services[internet][text1]"]');
-                if (netText1 && saved.net_text1 !== undefined && saved.net_text1 !== '') netText1.value = saved.net_text1;
+                if (saved.net_text1 !== undefined) setVal('net_text1', saved.net_text1);
 
                 if (saved.net_opt2 !== undefined) {
                     const cb = document.getElementById('net_opt2');
                     if (cb) cb.checked = !!saved.net_opt2;
                 }
-                const netText2 = document.querySelector('input[name="services[internet][text2]"]');
-                if (netText2 && saved.net_text2 !== undefined && saved.net_text2 !== '') netText2.value = saved.net_text2;
+                if (saved.net_text2 !== undefined) setVal('net_text2', saved.net_text2);
 
                 if (saved.tel_opt1 !== undefined) {
                     const cb = document.getElementById('tel_opt1');
                     if (cb) cb.checked = !!saved.tel_opt1;
                 }
-                const telText1 = document.querySelector('input[name="services[telepon][text1]"]');
-                if (telText1 && saved.tel_text1 !== undefined && saved.tel_text1 !== '') telText1.value = saved.tel_text1;
+                if (saved.tel_text1 !== undefined) setVal('tel_text1', saved.tel_text1);
 
                 if (saved.tel_opt2 !== undefined) {
                     const cb = document.getElementById('tel_opt2');
                     if (cb) cb.checked = !!saved.tel_opt2;
                 }
-                const telText2 = document.querySelector('input[name="services[telepon][text2]"]');
-                if (telText2 && saved.tel_text2 !== undefined && saved.tel_text2 !== '') telText2.value = saved.tel_text2;
+                if (saved.tel_text2 !== undefined) setVal('tel_text2', saved.tel_text2);
+
+                // Auto-sync checkboxes if text/select is filled
+                [
+                    { cb: document.getElementById('tv_opt1'), text: document.getElementById('tv_text1') },
+                    { cb: document.getElementById('tv_opt2'), text: document.getElementById('tv_text2') },
+                    { cb: document.getElementById('net_opt1'), text: document.getElementById('net_text1') },
+                    { cb: document.getElementById('net_opt2'), text: document.getElementById('net_text2') },
+                    { cb: document.getElementById('tel_opt1'), text: document.getElementById('tel_text1') },
+                    { cb: document.getElementById('tel_opt2'), text: document.getElementById('tel_text2') }
+                ].forEach(p => {
+                    if (p.cb && p.text && p.text.value.trim() !== '') {
+                        p.cb.checked = true;
+                    }
+                });
 
                 // Restore Terms Agreement
                 if (saved.terms_agreed !== undefined) {
@@ -1086,6 +1107,8 @@
                 }
             } catch (err) {
                 console.warn('LocalStorage restore error:', err);
+            } finally {
+                isRestoring = false;
             }
         }
 
@@ -1348,12 +1371,12 @@
                     navStatusBox.className = "flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-semibold text-center transition-all bg-emerald-50 border border-emerald-200 text-emerald-800 leading-snug";
                     if (navStatusIcon) navStatusIcon.className = "fa-solid fa-circle-check text-emerald-600 shrink-0 text-xs";
                     navStatusText.textContent = (currentStep === totalSteps) 
-                        ? "Data dan tanda tangan lengkap. Klik Kirim." 
+                        ? "Data & TTD lengkap. Klik Kirim." 
                         : "Data lengkap. Klik Lanjut.";
                 } else {
                     navStatusBox.className = "flex-1 min-w-0 flex items-center justify-center gap-1.5 sm:gap-2 px-2.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-semibold text-center transition-all bg-amber-50 border border-amber-200/80 text-amber-800 leading-snug";
                     if (navStatusIcon) navStatusIcon.className = "fa-solid fa-circle-info text-amber-600 shrink-0 text-xs";
-                    navStatusText.textContent = "Pastikan seluruh kolom wajib (*) terisi";
+                    navStatusText.textContent = "Pastikan kolom wajib (*) terisi";
                 }
             }
         }
@@ -1480,6 +1503,7 @@
         }
 
         function changeStep(delta) {
+            saveFormDataToLocal();
             if (delta > 0) {
                 const { isValid, firstInvalidElement } = checkStepValidity(currentStep, true);
                 if (!isValid) {
@@ -1498,6 +1522,7 @@
         }
 
         function goToStep(targetStep) {
+            saveFormDataToLocal();
             if (targetStep < currentStep) {
                 currentStep = targetStep;
                 updateStepUI();
@@ -1962,15 +1987,15 @@
                     });
                 }
                 if (p.text) {
-                    p.text.addEventListener('input', () => {
-                        validateSingleField('services_selected', true);
-                        refreshButtonStates();
-                        saveFormDataToLocal();
-                    });
-                    p.text.addEventListener('blur', () => {
-                        validateSingleField('services_selected', true);
-                        refreshButtonStates();
-                        saveFormDataToLocal();
+                    ['input', 'change', 'blur'].forEach(evt => {
+                        p.text.addEventListener(evt, () => {
+                            if (p.cb && p.text.value.trim() !== '') {
+                                p.cb.checked = true;
+                            }
+                            validateSingleField('services_selected', true);
+                            refreshButtonStates();
+                            saveFormDataToLocal();
+                        });
                     });
                 }
             });

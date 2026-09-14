@@ -28,15 +28,20 @@
 
     <!-- Active Rejection / Revision Warning if present -->
     @if($registration->status === 'revision')
-        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs space-y-1">
-            <div class="font-bold flex items-center gap-1.5 text-rose-700">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                <span>Pengajuan Ini Sedang Berstatus REVISI:</span>
+        <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+            <div class="space-y-1">
+                <div class="font-bold flex items-center gap-1.5 text-rose-700">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Pengajuan Ini Sedang Berstatus REVISI</span>
+                </div>
+                <p class="leading-relaxed text-rose-900">
+                    Kategori: <strong>{{ $registration->rejection_category ?: 'Perbaikan Dokumen' }}</strong>. Catatan: {{ $registration->rejection_notes }}
+                </p>
             </div>
-            <p class="leading-relaxed">
-                Kategori: <strong>{{ $registration->rejection_category ?: 'Perbaikan Dokumen' }}</strong>.<br>
-                Catatan Revisi: {{ $registration->rejection_notes }}
-            </p>
+            <button type="button" onclick="openResendModal()" 
+                    class="inline-flex items-center justify-center px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-xs transition-all flex-shrink-0 cursor-pointer">
+                <span>Kirim Ulang Notifikasi ke Sales</span>
+            </button>
         </div>
     @endif
 
@@ -446,19 +451,45 @@
                     </div>
                 </div>
             @elseif($registration->status === 'revision')
-                <div class="rounded-3xl bg-rose-50 border border-rose-200 p-6 shadow-sm space-y-3">
-                    <div class="flex items-center gap-2.5 text-rose-800 font-extrabold text-sm">
-                        <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-sm shadow-xs">
+                <div class="rounded-3xl bg-white border-2 border-rose-200 p-6 shadow-sm space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-sm shadow-xs flex-shrink-0 mt-0.5">
                             <i class="fa-solid fa-triangle-exclamation"></i>
                         </div>
-                        <div>
-                            <div class="text-rose-900">Menunggu Tindak Lanjut Revisi</div>
-                            <div class="text-[11px] font-normal text-rose-700">Notifikasi telah dikirim ke Sales</div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-extrabold text-sm text-[#2C2C2C]">Menunggu Tindak Lanjut Revisi</h4>
+                            <div class="text-[11px] text-rose-600 font-medium">Permintaan perbaikan data telah dikirim</div>
                         </div>
                     </div>
-                    <p class="text-xs text-rose-800 leading-relaxed">
-                        Pengajuan ini sedang menunggu pelanggan/sales untuk memperbarui dokumen yang diminta sebelum dapat di-review kembali.
+
+                    <div class="p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/80 text-xs space-y-2">
+                        <div class="flex justify-between items-center text-[11px]">
+                            <span class="text-gray-500 font-medium">Kategori Revisi:</span>
+                            <span class="font-bold text-rose-700 bg-white px-2 py-0.5 rounded-lg border border-rose-200">{{ $registration->rejection_category ?: 'Perbaikan Dokumen' }}</span>
+                        </div>
+                        @if($registration->revision_at)
+                            <div class="flex justify-between items-center text-[11px]">
+                                <span class="text-gray-500 font-medium">Waktu Permintaan:</span>
+                                <span class="font-mono text-gray-700 font-semibold">{{ $registration->revision_at->format('d M Y, H:i') }} WIB</span>
+                            </div>
+                        @endif
+                        <div class="pt-1.5 border-t border-rose-200/60 text-[11px]">
+                            <span class="text-gray-500 font-medium block mb-1">Catatan Revisi C-Care:</span>
+                            <p class="text-gray-800 bg-white p-2.5 rounded-xl border border-rose-100 leading-relaxed font-normal">
+                                {{ $registration->rejection_notes ?: '-' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-gray-500 leading-relaxed">
+                        Jika Sales AM (<strong>{{ $registration->sales_name }}</strong>) belum menindaklanjuti perbaikan data ke pelanggan, Anda dapat mengirimkan ulang notifikasi pengingat ke aplikasi mobile Sales.
                     </p>
+
+                    <!-- Trigger Resend Notification Modal -->
+                    <button type="button" onclick="openResendModal()" 
+                            class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-[#F48C5B] hover:from-amber-600 hover:to-[#EF666B] text-white font-bold text-xs shadow-md shadow-amber-500/20 transition-all flex items-center justify-center cursor-pointer">
+                        <span>Kirim Ulang Notifikasi ke Sales</span>
+                    </button>
                 </div>
             @endif
 
@@ -584,6 +615,69 @@
     </div>
 </div>
 
+<!-- Resend Revision Notification Modal -->
+<div id="resendModal" class="fixed inset-0 z-50 hidden bg-black/40 backdrop-blur-xs overflow-y-auto p-4 flex items-center justify-center">
+    <div class="relative w-full max-w-lg bg-white border border-gray-200 rounded-3xl shadow-2xl overflow-hidden my-8">
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-[#F8F9FA]">
+            <div class="flex items-center gap-2 font-bold text-sm text-amber-700">
+                <i class="fa-solid fa-bell text-amber-600"></i>
+                <span>Kirim Ulang Notifikasi Revisi ke Sales</span>
+            </div>
+            <button type="button" onclick="closeResendModal()" class="text-gray-400 hover:text-gray-600">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form action="{{ route('ccare.resendRevision', $registration->id) }}" method="POST">
+            @csrf
+            <div class="p-6 space-y-4 text-xs">
+                <p class="text-gray-700 leading-relaxed">
+                    Kirim notifikasi pengingat revisi untuk pendaftaran <strong class="text-[#2C2C2C]">{{ $registration->customer_name }}</strong> ({{ $registration->registration_code }}) ke Sales AM <strong class="text-[#F48C5B]">{{ $registration->sales_name }}</strong>.
+                </p>
+
+                <div class="p-3.5 rounded-2xl bg-[#FEF4F0] border border-[#F6D8CE] text-[11px] space-y-1.5">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Kategori Revisi:</span>
+                        <span class="font-bold text-[#9B385B]">{{ $registration->rejection_category ?: 'Perbaikan Dokumen' }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Sales AM:</span>
+                        <span class="font-bold text-[#F48C5B]">{{ $registration->sales_name }} ({{ $registration->sales_am_id }})</span>
+                    </div>
+                    <div class="pt-1.5 border-t border-[#F6D8CE] text-gray-700">
+                        <span class="text-gray-500 block mb-0.5 font-medium">Catatan Revisi Saat Ini:</span>
+                        <p class="italic text-gray-600 bg-white/70 p-2 rounded-lg border border-[#F6D8CE]/60">{{ $registration->rejection_notes }}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="reminder_notes" class="block font-bold text-[#333333] mb-1.5">
+                        Pesan Pengingat Tambahan (Opsional)
+                    </label>
+                    <textarea name="reminder_notes" id="reminder_notes" rows="3"
+                              placeholder="Contoh: Mohon segera tindak lanjuti revisi data pelanggan sebelum SLA berakhir..."
+                              class="w-full px-3.5 py-2 rounded-xl bg-white border border-gray-300 text-xs text-[#2C2C2C] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                    <p class="text-[10px] text-gray-400 mt-1">Pesan tambahan ini akan dilampirkan dalam notifikasi yang dikirim ke aplikasi Sales.</p>
+                </div>
+
+                <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] flex items-start gap-2">
+                    <i class="fa-solid fa-bell text-sm mt-0.5 text-amber-600"></i>
+                    <span>Sistem akan langsung mengirimkan notifikasi baru ke <strong>Mobile Apps Sales</strong> beserta tautan formulir pendaftaran untuk diteruskan ke pelanggan.</span>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 border-t border-gray-100 bg-[#F8F9FA] flex items-center justify-end gap-3">
+                <button type="button" onclick="closeResendModal()" class="px-4 py-2 rounded-xl bg-white hover:bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200">
+                    Batal
+                </button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-[#F48C5B] hover:from-amber-600 hover:to-[#EF666B] text-white text-xs font-bold shadow-md shadow-amber-500/20 flex items-center justify-center">
+                    <span>Kirim Pengingat Sekarang</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Full Interactive Image Viewer Modal (Zoom, Pan, Drag, Rotate) -->
 <div id="imageViewerModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex flex-col select-none opacity-0 transition-opacity duration-200">
     
@@ -688,6 +782,13 @@
     }
     function closeRejectModal() {
         document.getElementById('rejectModal').classList.add('hidden');
+    }
+
+    function openResendModal() {
+        document.getElementById('resendModal').classList.remove('hidden');
+    }
+    function closeResendModal() {
+        document.getElementById('resendModal').classList.add('hidden');
     }
 
     // ==========================================
