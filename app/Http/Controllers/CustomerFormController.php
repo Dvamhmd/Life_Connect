@@ -36,7 +36,7 @@ class CustomerFormController extends Controller
             'brand_name' => ['nullable', 'string', 'max:255'],
             'identity_type' => ['required', 'string', 'in:KTP,SIM,Paspor'],
             'identity_number' => ['required', 'string', 'max:50'],
-            'birth_date' => ['required', 'date'],
+            'birth_date' => ['required', 'date', 'before_or_equal:today'],
             'gender' => ['required', 'string', 'in:P,W,Laki-laki,Perempuan'],
             'phone_telp' => ['nullable', 'string', 'max:30'],
             'phone_wa' => ['required', 'string', 'max:30'],
@@ -60,6 +60,32 @@ class CustomerFormController extends Controller
         ];
 
         $request->validate($rules);
+
+        // Ensure at least one service option is selected and all checked services have notes/package filled
+        $hasServiceSelected = false;
+        $missingServiceText = false;
+        if ($request->has('services') && is_array($request->services)) {
+            foreach ($request->services as $svc) {
+                if (!empty($svc['opt1'])) {
+                    $hasServiceSelected = true;
+                    if (empty(trim($svc['text1'] ?? ''))) {
+                        $missingServiceText = true;
+                    }
+                }
+                if (!empty($svc['opt2'])) {
+                    $hasServiceSelected = true;
+                    if (empty(trim($svc['text2'] ?? ''))) {
+                        $missingServiceText = true;
+                    }
+                }
+            }
+        }
+        if (!$hasServiceSelected) {
+            return back()->withErrors(['services' => 'Pilih minimal 1 paket layanan berlangganan.'])->withInput();
+        }
+        if ($missingServiceText) {
+            return back()->withErrors(['services' => 'Mohon isi keterangan/paket untuk setiap layanan yang Anda centang.'])->withInput();
+        }
 
         $now = now();
         $oldStatus = $registration->status;

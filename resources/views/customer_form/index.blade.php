@@ -209,13 +209,12 @@
             <!-- STEP 1: DATA PRIBADI -->
             <div id="step-1" class="step-pane transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             1
                         </div>
                         <div>
                             <h3 class="text-base font-extrabold text-[#2C2C2C]">Data Pribadi</h3>
-                            <p class="text-xs text-gray-500">Informasi identitas pelanggan dan lokasi pemasangan</p>
                         </div>
                     </div>
 
@@ -230,7 +229,6 @@
                                    value="{{ old('customer_name', $registration->customer_name) }}"
                                    placeholder="Nama lengkap sesuai tanda pengenal..."
                                    class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] font-medium transition-colors">
-                            <span class="text-[10px] text-gray-400 mt-1 block">Dapat diedit jika terdapat perubahan/koreksi ejaan</span>
                             <p id="err_customer_name" class="field-error-text text-rose-500 text-[11px] font-semibold mt-1 hidden flex items-center gap-1.5">
                                 <i class="fa-solid fa-circle-exclamation text-xs"></i>
                                 <span>Nama lengkap wajib diisi (minimal 2 karakter).</span>
@@ -300,12 +298,13 @@
                                 Tanggal Lahir (dd/mm/yyyy) <span class="text-rose-500">*</span>
                             </label>
                             <input type="date" name="birth_date" id="birth_date" required
+                                   max="{{ date('Y-m-d') }}"
                                    value="{{ old('birth_date', $registration->birth_date?->format('Y-m-d')) }}"
                                    class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
                             <span class="text-[10px] text-gray-400 mt-1 block">Format: Hari / Bulan / Tahun</span>
                             <p id="err_birth_date" class="field-error-text text-rose-500 text-[11px] font-semibold mt-1 hidden flex items-center gap-1.5">
                                 <i class="fa-solid fa-circle-exclamation text-xs"></i>
-                                <span>Tanggal lahir wajib dipilih.</span>
+                                <span id="err_birth_date_text">Tanggal lahir wajib dipilih dan tidak boleh melebihi hari ini.</span>
                             </p>
                         </div>
 
@@ -355,7 +354,6 @@
                                    value="{{ old('phone_wa', $registration->phone_wa) }}"
                                    placeholder="Contoh: 081234567890"
                                    class="w-full px-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
-                            <span class="text-[10px] text-gray-400 mt-1 block">Nomor aktif untuk informasi instalasi dan tagihan</span>
                             <p id="err_phone_wa" class="field-error-text text-rose-500 text-[11px] font-semibold mt-1 hidden flex items-center gap-1.5">
                                 <i class="fa-solid fa-circle-exclamation text-xs"></i>
                                 <span>Nomor HP / WhatsApp wajib diisi (minimal 8 digit).</span>
@@ -398,13 +396,12 @@
             <!-- STEP 2: PAKET BERLANGGANAN -->
             <div id="step-2" class="step-pane hidden transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             2
                         </div>
                         <div>
                             <h3 class="text-base font-extrabold text-[#2C2C2C]">Paket Berlangganan</h3>
-                            <p class="text-xs text-gray-500">Pilih layanan yang ingin Anda nikmati beserta catatan dan jangka waktu berlangganan</p>
                         </div>
                     </div>
 
@@ -426,104 +423,131 @@
                         $telText2 = old('services.telepon.text2', $services['telepon']['text2'] ?? '');
                     @endphp
 
-                    <!-- Service Checklist Matrix (Vertical Checkboxes + Textfields) -->
-                    <div class="space-y-4">
-                        <label class="block text-xs font-bold text-[#2C2C2C]">Pilihan Layanan:</label>
-
-                        <!-- 1. TV KABEL -->
-                        <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/50 transition-all space-y-3">
-                            <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2">
-                                <div class="w-7 h-7 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-xs">
-                                    <i class="fa-solid fa-tv"></i>
-                                </div>
-                                <span class="font-extrabold text-xs text-[#2C2C2C] tracking-wide uppercase">TV KABEL</span>
-                            </div>
-
-                            <div class="space-y-2.5">
-                                <!-- Checkbox 1 + Textfield -->
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" name="services[tv_kabel][opt1]" value="1" {{ $tvOpt1 ? 'checked' : '' }}
-                                           class="w-5 h-5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer">
-                                    <input type="text" name="services[tv_kabel][text1]" value="{{ $tvText1 }}"
-                                           placeholder="" autocomplete="off"
-                                           class="flex-1 px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B]">
-                                </div>
-
-                                <!-- Checkbox 2 + Textfield -->
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" name="services[tv_kabel][opt2]" value="1" {{ $tvOpt2 ? 'checked' : '' }}
-                                           class="w-5 h-5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer">
-                                    <input type="text" name="services[tv_kabel][text2]" value="{{ $tvText2 }}"
-                                           placeholder="" autocomplete="off"
-                                           class="flex-1 px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B]">
-                                </div>
-                            </div>
+                    <!-- Service Checklist Matrix (Clean Responsive 3-Card Grid) -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-bold text-[#2C2C2C]">
+                                Pilihan Layanan <span class="text-rose-500">*</span> <span class="text-gray-400 font-normal text-[11px]">(Pilih minimal 1 layanan)</span>
+                            </label>
                         </div>
 
-                        <!-- 2. INTERNET -->
-                        <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/50 transition-all space-y-3">
-                            <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2">
-                                <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xs">
-                                    <i class="fa-solid fa-wifi"></i>
+                        <div id="box_services_selection" class="grid grid-cols-1 md:grid-cols-3 gap-4 transition-all">
+
+                            <!-- 1. TV KABEL -->
+                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-orange-50 text-[#F48C5B] border border-orange-100 flex items-center justify-center font-bold text-sm shadow-2xs">
+                                            <i class="fa-solid fa-tv"></i>
+                                        </div>
+                                        <div>
+                                            <span class="font-extrabold text-xs text-[#2C2C2C] tracking-wide uppercase block">TV KABEL</span>
+                                            <span class="text-[10px] text-gray-400 block">Layanan TV kabel interaktif</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2.5 mt-3">
+                                        <!-- Checkbox 1 + Textfield -->
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox" name="services[tv_kabel][opt1]" id="tv_opt1" value="1" {{ $tvOpt1 ? 'checked' : '' }}
+                                                   class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
+                                            <input type="text" name="services[tv_kabel][text1]" id="tv_text1" value="{{ $tvText1 }}"
+                                                   placeholder="Catatan / Paket 1..." autocomplete="off"
+                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                        </div>
+
+                                        <!-- Checkbox 2 + Textfield -->
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox" name="services[tv_kabel][opt2]" id="tv_opt2" value="1" {{ $tvOpt2 ? 'checked' : '' }}
+                                                   class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
+                                            <input type="text" name="services[tv_kabel][text2]" id="tv_text2" value="{{ $tvText2 }}"
+                                                   placeholder="Catatan / Paket 2..." autocomplete="off"
+                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                        </div>
+                                    </div>
                                 </div>
-                                <span class="font-extrabold text-xs text-[#2C2C2C] tracking-wide uppercase">INTERNET</span>
                             </div>
 
-                            <div class="space-y-2.5">
-                                <!-- Checkbox 1 + Textfield -->
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" name="services[internet][opt1]" value="1" {{ $netOpt1 ? 'checked' : '' }}
-                                           class="w-5 h-5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer">
-                                    <input type="text" name="services[internet][text1]" value="{{ $netText1 }}"
-                                           placeholder="" autocomplete="off"
-                                           class="flex-1 px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B]">
-                                </div>
+                            <!-- 2. INTERNET -->
+                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center font-bold text-sm shadow-2xs">
+                                            <i class="fa-solid fa-wifi"></i>
+                                        </div>
+                                        <div>
+                                            <span class="font-extrabold text-xs text-[#2C2C2C] tracking-wide uppercase block">INTERNET</span>
+                                            <span class="text-[10px] text-gray-400 block">Koneksi fiber optik ultra cepat</span>
+                                        </div>
+                                    </div>
 
-                                <!-- Checkbox 2 + Textfield -->
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" name="services[internet][opt2]" value="1" {{ $netOpt2 ? 'checked' : '' }}
-                                           class="w-5 h-5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer">
-                                    <input type="text" name="services[internet][text2]" value="{{ $netText2 }}"
-                                           placeholder="" autocomplete="off"
-                                           class="flex-1 px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B]">
+                                    <div class="space-y-2.5 mt-3">
+                                        <!-- Checkbox 1 + Textfield -->
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox" name="services[internet][opt1]" id="net_opt1" value="1" {{ $netOpt1 ? 'checked' : '' }}
+                                                   class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
+                                            <input type="text" name="services[internet][text1]" id="net_text1" value="{{ $netText1 }}"
+                                                   placeholder="Kecepatan / Paket 1..." autocomplete="off"
+                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                        </div>
+
+                                        <!-- Checkbox 2 + Textfield -->
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox" name="services[internet][opt2]" id="net_opt2" value="1" {{ $netOpt2 ? 'checked' : '' }}
+                                                   class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
+                                            <input type="text" name="services[internet][text2]" id="net_text2" value="{{ $netText2 }}"
+                                                   placeholder="Kecepatan / Paket 2..." autocomplete="off"
+                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- 3. TELEPON -->
+                            <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/60 hover:shadow-xs transition-all space-y-3 flex flex-col justify-between">
+                                <div>
+                                    <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2.5">
+                                        <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center font-bold text-sm shadow-2xs">
+                                            <i class="fa-solid fa-phone"></i>
+                                        </div>
+                                        <div>
+                                            <span class="font-extrabold text-xs text-[#2C2C2C] tracking-wide uppercase block">TELEPON</span>
+                                            <span class="text-[10px] text-gray-400 block">Layanan suara kabel / VoIP</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-2.5 mt-3">
+                                        <!-- Checkbox 1 + Textfield -->
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox" name="services[telepon][opt1]" id="tel_opt1" value="1" {{ $telOpt1 ? 'checked' : '' }}
+                                                   class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
+                                            <input type="text" name="services[telepon][text1]" id="tel_text1" value="{{ $telText1 }}"
+                                                   placeholder="Nomor / Paket 1..." autocomplete="off"
+                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                        </div>
+
+                                        <!-- Checkbox 2 + Textfield -->
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox" name="services[telepon][opt2]" id="tel_opt2" value="1" {{ $telOpt2 ? 'checked' : '' }}
+                                                   class="service-checkbox w-4.5 h-4.5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer shrink-0">
+                                            <input type="text" name="services[telepon][text2]" id="tel_text2" value="{{ $telText2 }}"
+                                                   placeholder="Nomor / Paket 2..." autocomplete="off"
+                                                   class="flex-1 px-3 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-colors">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <!-- 3. TELEPON -->
-                        <div class="p-4 rounded-2xl border border-gray-200 bg-white hover:border-[#F48C5B]/50 transition-all space-y-3">
-                            <div class="flex items-center gap-2.5 border-b border-gray-100 pb-2">
-                                <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">
-                                    <i class="fa-solid fa-phone"></i>
-                                </div>
-                                <span class="font-extrabold text-xs text-[#2C2C2C] tracking-wide uppercase">TELEPON</span>
-                            </div>
-
-                            <div class="space-y-2.5">
-                                <!-- Checkbox 1 + Textfield -->
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" name="services[telepon][opt1]" value="1" {{ $telOpt1 ? 'checked' : '' }}
-                                           class="w-5 h-5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer">
-                                    <input type="text" name="services[telepon][text1]" value="{{ $telText1 }}"
-                                           placeholder="" autocomplete="off"
-                                           class="flex-1 px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B]">
-                                </div>
-
-                                <!-- Checkbox 2 + Textfield -->
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" name="services[telepon][opt2]" value="1" {{ $telOpt2 ? 'checked' : '' }}
-                                           class="w-5 h-5 rounded text-[#F48C5B] focus:ring-[#F48C5B] border-gray-300 cursor-pointer">
-                                    <input type="text" name="services[telepon][text2]" value="{{ $telText2 }}"
-                                           placeholder="" autocomplete="off"
-                                           class="flex-1 px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-200 text-xs text-[#2C2C2C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B]">
-                                </div>
-                            </div>
-                        </div>
-
+                        <p id="err_services_selected" class="field-error-text text-rose-500 text-[11px] font-semibold mt-1.5 hidden flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-exclamation text-xs"></i>
+                            <span>Pilih minimal 1 paket layanan berlangganan.</span>
+                        </p>
                     </div>
 
                     <!-- Textfield Jangka Waktu Berlangganan -->
-                    <div class="pt-2">
+                    <div class="pt-4 border-t border-gray-100">
                         <label for="subscription_period" class="block font-bold text-xs text-[#333333] mb-1.5">
                             Jangka Waktu Berlangganan <span class="text-rose-500">*</span>
                         </label>
@@ -551,7 +575,7 @@
             <!-- STEP 3: INFORMASI PENAGIHAN -->
             <div id="step-3" class="step-pane hidden transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             3
                         </div>
@@ -640,7 +664,7 @@
             <!-- STEP 4: KELENGKAPAN DOKUMEN FOTO (PREVIEW ENABLED) -->
             <div id="step-4" class="step-pane hidden transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             4
                         </div>
@@ -785,7 +809,7 @@
             <!-- STEP 5: PERSETUJUAN BERLANGGANAN & TANDA TANGAN VIRTUAL -->
             <div id="step-5" class="step-pane hidden transition-all duration-300">
                 <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div class="flex items-center gap-3 border-b border-gray-100 pb-4">
+                    <div class="flex items-center gap-3 border-b border-gray-200 pb-4">
                         <div class="w-9 h-9 rounded-xl bg-[#FEF4F0] border border-[#F48C5B]/40 text-[#F48C5B] flex items-center justify-center font-extrabold text-sm shadow-xs">
                             5
                         </div>
@@ -880,7 +904,24 @@
     <!-- JavaScript Helpers -->
     <script>
         // Multi-Step Form Controller & Realtime Validator
-        let currentStep = {{ $initialStep }};
+        const storageKeyStep = 'lc_step_{{ $registration->token }}';
+        const storageKeyDraft = 'lc_draft_{{ $registration->token }}';
+        const hasServerErrors = {{ $errors->any() ? 'true' : 'false' }};
+        const serverInitialStep = {{ $initialStep }};
+
+        let currentStep = serverInitialStep;
+        if (!hasServerErrors) {
+            try {
+                const savedStep = localStorage.getItem(storageKeyStep);
+                if (savedStep) {
+                    const parsed = parseInt(savedStep, 10);
+                    if (parsed >= 1 && parsed <= 5) {
+                        currentStep = parsed;
+                    }
+                }
+            } catch(e) {}
+        }
+
         const totalSteps = 5;
         const stepTitles = [
             "Data Pribadi",
@@ -893,6 +934,160 @@
         const existingKtpPath = @json($registration->ktp_photo_path);
         const existingHousePath = @json($registration->house_photo_path);
         const existingSelfiePath = @json($registration->selfie_sales_path);
+
+        // Save form draft data to localStorage
+        function saveFormDataToLocal() {
+            try {
+                const formData = {
+                    customer_name: document.getElementById('customer_name')?.value || '',
+                    brand_name: document.getElementById('brand_name')?.value || '',
+                    identity_type: document.querySelector('input[name="identity_type"]:checked')?.value || '',
+                    identity_number: document.getElementById('identity_number')?.value || '',
+                    birth_date: document.getElementById('birth_date')?.value || '',
+                    gender: document.querySelector('input[name="gender"]:checked')?.value || '',
+                    phone_telp: document.getElementById('phone_telp')?.value || '',
+                    phone_wa: document.getElementById('phone_wa')?.value || '',
+                    email: document.getElementById('email')?.value || '',
+                    address_detail: document.getElementById('address_detail')?.value || '',
+                    subscription_period: document.getElementById('subscription_period')?.value || '',
+
+                    tv_opt1: document.getElementById('tv_opt1')?.checked || false,
+                    tv_text1: document.querySelector('input[name="services[tv_kabel][text1]"]')?.value || '',
+                    tv_opt2: document.getElementById('tv_opt2')?.checked || false,
+                    tv_text2: document.querySelector('input[name="services[tv_kabel][text2]"]')?.value || '',
+
+                    net_opt1: document.getElementById('net_opt1')?.checked || false,
+                    net_text1: document.querySelector('input[name="services[internet][text1]"]')?.value || '',
+                    net_opt2: document.getElementById('net_opt2')?.checked || false,
+                    net_text2: document.querySelector('input[name="services[internet][text2]"]')?.value || '',
+
+                    tel_opt1: document.getElementById('tel_opt1')?.checked || false,
+                    tel_text1: document.querySelector('input[name="services[telepon][text1]"]')?.value || '',
+                    tel_opt2: document.getElementById('tel_opt2')?.checked || false,
+                    tel_text2: document.querySelector('input[name="services[telepon][text2]"]')?.value || '',
+
+                    billing_name: document.getElementById('billing_name')?.value || '',
+                    billing_email: document.getElementById('billing_email')?.value || '',
+                    billing_phone: document.getElementById('billing_phone')?.value || '',
+                    billing_mobile: document.getElementById('billing_mobile')?.value || '',
+                    billing_address: document.getElementById('billing_address')?.value || '',
+
+                    signature_data: document.getElementById('signatureData')?.value || '',
+                    terms_agreed: document.getElementById('terms_agreed')?.checked || false
+                };
+                localStorage.setItem(storageKeyDraft, JSON.stringify(formData));
+            } catch (err) {
+                console.warn('LocalStorage save error:', err);
+            }
+        }
+
+        // Restore form draft data from localStorage
+        function restoreFormDataFromLocal() {
+            try {
+                const savedRaw = localStorage.getItem(storageKeyDraft);
+                if (!savedRaw) return;
+                const saved = JSON.parse(savedRaw);
+                if (!saved || typeof saved !== 'object') return;
+
+                const setVal = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el && val !== undefined && val !== null && val !== '') {
+                        el.value = val;
+                    }
+                };
+
+                setVal('customer_name', saved.customer_name);
+                setVal('brand_name', saved.brand_name);
+                setVal('identity_number', saved.identity_number);
+                setVal('birth_date', saved.birth_date);
+                setVal('phone_telp', saved.phone_telp);
+                setVal('phone_wa', saved.phone_wa);
+                setVal('email', saved.email);
+                setVal('address_detail', saved.address_detail);
+                setVal('subscription_period', saved.subscription_period);
+
+                setVal('billing_name', saved.billing_name);
+                setVal('billing_email', saved.billing_email);
+                setVal('billing_phone', saved.billing_phone);
+                setVal('billing_mobile', saved.billing_mobile);
+                setVal('billing_address', saved.billing_address);
+
+                // Restore Radios
+                if (saved.identity_type) {
+                    const r = document.querySelector(`input[name="identity_type"][value="${saved.identity_type}"]`);
+                    if (r) {
+                        r.checked = true;
+                        updateIdTypeSelection(r);
+                    }
+                }
+                if (saved.gender) {
+                    const r = document.querySelector(`input[name="gender"][value="${saved.gender}"]`);
+                    if (r) {
+                        r.checked = true;
+                        updateGenderSelection(r);
+                    }
+                }
+
+                // Restore Services
+                if (saved.tv_opt1 !== undefined) {
+                    const cb = document.getElementById('tv_opt1');
+                    if (cb) cb.checked = !!saved.tv_opt1;
+                }
+                const tvText1 = document.querySelector('input[name="services[tv_kabel][text1]"]');
+                if (tvText1 && saved.tv_text1 !== undefined && saved.tv_text1 !== '') tvText1.value = saved.tv_text1;
+
+                if (saved.tv_opt2 !== undefined) {
+                    const cb = document.getElementById('tv_opt2');
+                    if (cb) cb.checked = !!saved.tv_opt2;
+                }
+                const tvText2 = document.querySelector('input[name="services[tv_kabel][text2]"]');
+                if (tvText2 && saved.tv_text2 !== undefined && saved.tv_text2 !== '') tvText2.value = saved.tv_text2;
+
+                if (saved.net_opt1 !== undefined) {
+                    const cb = document.getElementById('net_opt1');
+                    if (cb) cb.checked = !!saved.net_opt1;
+                }
+                const netText1 = document.querySelector('input[name="services[internet][text1]"]');
+                if (netText1 && saved.net_text1 !== undefined && saved.net_text1 !== '') netText1.value = saved.net_text1;
+
+                if (saved.net_opt2 !== undefined) {
+                    const cb = document.getElementById('net_opt2');
+                    if (cb) cb.checked = !!saved.net_opt2;
+                }
+                const netText2 = document.querySelector('input[name="services[internet][text2]"]');
+                if (netText2 && saved.net_text2 !== undefined && saved.net_text2 !== '') netText2.value = saved.net_text2;
+
+                if (saved.tel_opt1 !== undefined) {
+                    const cb = document.getElementById('tel_opt1');
+                    if (cb) cb.checked = !!saved.tel_opt1;
+                }
+                const telText1 = document.querySelector('input[name="services[telepon][text1]"]');
+                if (telText1 && saved.tel_text1 !== undefined && saved.tel_text1 !== '') telText1.value = saved.tel_text1;
+
+                if (saved.tel_opt2 !== undefined) {
+                    const cb = document.getElementById('tel_opt2');
+                    if (cb) cb.checked = !!saved.tel_opt2;
+                }
+                const telText2 = document.querySelector('input[name="services[telepon][text2]"]');
+                if (telText2 && saved.tel_text2 !== undefined && saved.tel_text2 !== '') telText2.value = saved.tel_text2;
+
+                // Restore Terms Agreement
+                if (saved.terms_agreed !== undefined) {
+                    const terms = document.getElementById('terms_agreed');
+                    if (terms) terms.checked = !!saved.terms_agreed;
+                }
+
+                // Restore Virtual Signature
+                if (saved.signature_data && saved.signature_data.length > 50) {
+                    const sigInput = document.getElementById('signatureData');
+                    if (sigInput) sigInput.value = saved.signature_data;
+                    hasSignature = true;
+                    if (signatureGuideText) signatureGuideText.style.opacity = '0.15';
+                }
+            } catch (err) {
+                console.warn('LocalStorage restore error:', err);
+            }
+        }
 
         // Validation Rules Definition
         function validateSingleField(fieldId, showMessage = false) {
@@ -913,9 +1108,23 @@
                 case 'identity_number':
                     isValid = el && el.value.trim().length >= 6;
                     break;
-                case 'birth_date':
-                    isValid = el && el.value.trim() !== '';
+                case 'birth_date': {
+                    const errSpan = document.getElementById('err_birth_date_text');
+                    if (!el || !el.value || el.value.trim() === '') {
+                        isValid = false;
+                        if (errSpan) errSpan.textContent = "Tanggal lahir wajib dipilih.";
+                    } else {
+                        const today = new Date();
+                        const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                        if (el.value > todayStr) {
+                            isValid = false;
+                            if (errSpan) errSpan.textContent = "Tanggal lahir tidak boleh melebihi tanggal hari ini.";
+                        } else {
+                            isValid = true;
+                        }
+                    }
                     break;
+                }
                 case 'gender': {
                     const checked = document.querySelector('input[name="gender"]:checked');
                     isValid = !!checked;
@@ -935,6 +1144,55 @@
                 case 'address_detail':
                     isValid = el && el.value.trim().length >= 5;
                     break;
+                case 'services_selected': {
+                    const pairs = [
+                        { cb: document.getElementById('tv_opt1'), text: document.getElementById('tv_text1') },
+                        { cb: document.getElementById('tv_opt2'), text: document.getElementById('tv_text2') },
+                        { cb: document.getElementById('net_opt1'), text: document.getElementById('net_text1') },
+                        { cb: document.getElementById('net_opt2'), text: document.getElementById('net_text2') },
+                        { cb: document.getElementById('tel_opt1'), text: document.getElementById('tel_text1') },
+                        { cb: document.getElementById('tel_opt2'), text: document.getElementById('tel_text2') }
+                    ];
+
+                    let checkedCount = 0;
+                    let hasMissingText = false;
+                    let firstMissingTextEl = null;
+
+                    pairs.forEach(p => {
+                        if (p.cb && p.cb.checked) {
+                            checkedCount++;
+                            const val = p.text ? p.text.value.trim() : '';
+                            if (val.length === 0) {
+                                hasMissingText = true;
+                                if (!firstMissingTextEl) firstMissingTextEl = p.text;
+                                if (showMessage && p.text) {
+                                    p.text.classList.add('border-rose-400', 'bg-rose-50/20', 'focus:ring-rose-400', 'focus:border-rose-400');
+                                    p.text.classList.remove('border-gray-200', 'bg-gray-50', 'focus:ring-[#F48C5B]', 'focus:border-[#F48C5B]');
+                                }
+                            } else if (p.text) {
+                                p.text.classList.remove('border-rose-400', 'bg-rose-50/20', 'focus:ring-rose-400', 'focus:border-rose-400');
+                                p.text.classList.add('border-gray-200', 'bg-gray-50', 'focus:ring-[#F48C5B]', 'focus:border-[#F48C5B]');
+                            }
+                        } else if (p.text) {
+                            p.text.classList.remove('border-rose-400', 'bg-rose-50/20', 'focus:ring-rose-400', 'focus:border-rose-400');
+                            p.text.classList.add('border-gray-200', 'bg-gray-50', 'focus:ring-[#F48C5B]', 'focus:border-[#F48C5B]');
+                        }
+                    });
+
+                    isValid = checkedCount > 0 && !hasMissingText;
+                    el = firstMissingTextEl || document.getElementById('box_services_selection');
+                    errEl = document.getElementById('err_services_selected');
+
+                    const errSpan = errEl ? errEl.querySelector('span') : null;
+                    if (errSpan) {
+                        if (checkedCount === 0) {
+                            errSpan.textContent = "Pilih minimal 1 paket layanan berlangganan.";
+                        } else if (hasMissingText) {
+                            errSpan.textContent = "Mohon isi keterangan/paket untuk setiap layanan yang Anda centang.";
+                        }
+                    }
+                    break;
+                }
                 case 'subscription_period':
                     isValid = el && parseInt(el.value) >= 1;
                     break;
@@ -1023,7 +1281,7 @@
                 case 1:
                     return ['customer_name', 'identity_type', 'identity_number', 'birth_date', 'gender', 'phone_wa', 'email', 'address_detail'];
                 case 2:
-                    return ['subscription_period'];
+                    return ['services_selected', 'subscription_period'];
                 case 3:
                     return ['billing_name', 'billing_email', 'billing_mobile', 'billing_address'];
                 case 4:
@@ -1126,6 +1384,11 @@
         }
 
         function updateStepUI() {
+            // Save current step to localStorage
+            try {
+                localStorage.setItem(storageKeyStep, currentStep);
+            } catch(e) {}
+
             // 1. Show / Hide Step Panes
             for (let i = 1; i <= totalSteps; i++) {
                 const pane = document.getElementById(`step-${i}`);
@@ -1229,6 +1492,7 @@
             if (newStep >= 1 && newStep <= totalSteps) {
                 currentStep = newStep;
                 updateStepUI();
+                saveFormDataToLocal();
                 scrollToTopStep();
             }
         }
@@ -1237,6 +1501,7 @@
             if (targetStep < currentStep) {
                 currentStep = targetStep;
                 updateStepUI();
+                saveFormDataToLocal();
                 scrollToTopStep();
             } else if (targetStep > currentStep) {
                 for (let s = currentStep; s < targetStep; s++) {
@@ -1244,12 +1509,14 @@
                     if (!isValid) {
                         currentStep = s;
                         updateStepUI();
+                        saveFormDataToLocal();
                         jumpToElement(firstInvalidElement);
                         return;
                     }
                 }
                 currentStep = targetStep;
                 updateStepUI();
+                saveFormDataToLocal();
                 scrollToTopStep();
             }
         }
@@ -1278,6 +1545,7 @@
             });
             validateSingleField('identity_type', true);
             refreshButtonStates();
+            saveFormDataToLocal();
         }
 
         function updateGenderSelection(radio) {
@@ -1291,6 +1559,7 @@
             });
             validateSingleField('gender', true);
             refreshButtonStates();
+            saveFormDataToLocal();
         }
 
         // Live Image Preview & Client-Side Fast WebP Converter
@@ -1442,8 +1711,19 @@
             ctx.lineJoin = 'round';
             ctx.strokeStyle = '#2C2C2C';
 
-            if (preserveDrawing && allStrokes.length > 0) {
-                redrawAllStrokes();
+            if (preserveDrawing) {
+                if (allStrokes.length > 0) {
+                    redrawAllStrokes();
+                } else if (signatureDataInput && signatureDataInput.value && signatureDataInput.value.startsWith('data:image')) {
+                    const img = new Image();
+                    img.onload = function() {
+                        if (ctx && canvas) {
+                            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                            ctx.drawImage(img, 0, 0, canvas.width / ratio, canvas.height / ratio);
+                        }
+                    };
+                    img.src = signatureDataInput.value;
+                }
             }
         }
 
@@ -1598,6 +1878,7 @@
 
             validateSingleField('signature_data', false);
             refreshButtonStates();
+            saveFormDataToLocal();
         }
 
         function initCanvasEngine() {
@@ -1629,14 +1910,15 @@
 
             validateSingleField('signature_data', true);
             refreshButtonStates();
+            saveFormDataToLocal();
         }
 
-        // Setup real-time input event listeners
+        // Setup real-time input event listeners and auto-saving
         function initRealtimeValidator() {
             const allFieldIds = [
-                'customer_name', 'identity_number', 'birth_date', 'phone_wa', 'email', 'address_detail',
+                'customer_name', 'brand_name', 'identity_number', 'birth_date', 'phone_telp', 'phone_wa', 'email', 'address_detail',
                 'subscription_period',
-                'billing_name', 'billing_email', 'billing_mobile', 'billing_address',
+                'billing_name', 'billing_email', 'billing_phone', 'billing_mobile', 'billing_address',
                 'ktp_photo', 'house_photo', 'selfie_sales_photo',
                 'terms_agreed'
             ];
@@ -1648,12 +1930,56 @@
                     el.addEventListener(eventType, () => {
                         validateSingleField(id, true);
                         refreshButtonStates();
+                        saveFormDataToLocal();
                     });
                     el.addEventListener('blur', () => {
                         validateSingleField(id, true);
                         refreshButtonStates();
+                        saveFormDataToLocal();
                     });
                 }
+            });
+
+            // Service checkboxes & note input fields event listeners
+            const servicePairs = [
+                { cb: document.getElementById('tv_opt1'), text: document.getElementById('tv_text1') },
+                { cb: document.getElementById('tv_opt2'), text: document.getElementById('tv_text2') },
+                { cb: document.getElementById('net_opt1'), text: document.getElementById('net_text1') },
+                { cb: document.getElementById('net_opt2'), text: document.getElementById('net_text2') },
+                { cb: document.getElementById('tel_opt1'), text: document.getElementById('tel_text1') },
+                { cb: document.getElementById('tel_opt2'), text: document.getElementById('tel_text2') }
+            ];
+
+            servicePairs.forEach(p => {
+                if (p.cb) {
+                    p.cb.addEventListener('change', () => {
+                        if (p.cb.checked && p.text && p.text.value.trim() === '') {
+                            p.text.focus();
+                        }
+                        validateSingleField('services_selected', true);
+                        refreshButtonStates();
+                        saveFormDataToLocal();
+                    });
+                }
+                if (p.text) {
+                    p.text.addEventListener('input', () => {
+                        validateSingleField('services_selected', true);
+                        refreshButtonStates();
+                        saveFormDataToLocal();
+                    });
+                    p.text.addEventListener('blur', () => {
+                        validateSingleField('services_selected', true);
+                        refreshButtonStates();
+                        saveFormDataToLocal();
+                    });
+                }
+            });
+
+            // Radio buttons event listeners
+            document.querySelectorAll('input[name="identity_type"], input[name="gender"]').forEach(radio => {
+                radio.addEventListener('change', () => {
+                    saveFormDataToLocal();
+                });
             });
 
             // Initial immediate check on current step so validators are visible right away
@@ -1662,6 +1988,7 @@
         }
 
         window.addEventListener('load', () => {
+            restoreFormDataFromLocal();
             initCanvasEngine();
             updateStepUI();
             initRealtimeValidator();
@@ -1681,6 +2008,12 @@
                 e.preventDefault();
                 refreshButtonStates();
                 jumpToElement(firstInvalidElement);
+            } else {
+                // Clear localStorage draft on valid form submission
+                try {
+                    localStorage.removeItem(storageKeyStep);
+                    localStorage.removeItem(storageKeyDraft);
+                } catch(err) {}
             }
         });
     </script>
