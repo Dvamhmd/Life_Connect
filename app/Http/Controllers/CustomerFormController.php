@@ -177,6 +177,9 @@ class CustomerFormController extends Controller
             default => $request->gender,
         };
 
+        // Check if this was a revision submission
+        $isRevision = ($oldStatus === 'revision') || ($registration->revision_at !== null) || ($registration->progressLogs()->where('to_status', 'revision')->exists());
+
         // Update Registration
         $registration->update([
             'customer_name' => $request->customer_name,
@@ -220,7 +223,9 @@ class CustomerFormController extends Controller
             'actor_role' => 'Pelanggan',
             'from_status' => $oldStatus,
             'to_status' => 'filled',
-            'notes' => "Pelanggan telah melengkapi data pendaftaran ({$packageName}), mengunggah dokumen KTP, Foto Rumah, & Foto Selfie bersama Sales, serta menandatangani formulir secara virtual.",
+            'notes' => $isRevision 
+                ? "Pelanggan telah mengirimkan perbaikan/revisi data pendaftaran ({$packageName}) dan tanda tangan virtual."
+                : "Pelanggan telah melengkapi data pendaftaran ({$packageName}), mengunggah dokumen KTP, Foto Rumah, & Foto Selfie bersama Sales, serta menandatangani formulir secara virtual.",
             'duration_seconds' => $durationSeconds,
             'created_at' => $now,
         ]);
@@ -229,7 +234,9 @@ class CustomerFormController extends Controller
         AuditLog::log(
             action: 'SUBMIT_CUSTOMER_FORM',
             module: 'CustomerForm',
-            description: "Calon pelanggan {$registration->customer_name} ({$registration->registration_code}) berhasil melengkapi formulir pendaftaran berlangganan.",
+            description: $isRevision
+                ? "Calon pelanggan {$registration->customer_name} ({$registration->registration_code}) berhasil mengirimkan perbaikan/revisi formulir pendaftaran."
+                : "Calon pelanggan {$registration->customer_name} ({$registration->registration_code}) berhasil melengkapi formulir pendaftaran berlangganan.",
             targetType: 'CustomerRegistration',
             targetId: $registration->id,
             oldValues: ['status' => $oldStatus],
@@ -242,8 +249,10 @@ class CustomerFormController extends Controller
             Notification::create([
                 'user_id' => $ccUser->id,
                 'sales_am_id' => null,
-                'title' => 'Form Pendaftaran Baru Masuk!',
-                'message' => "Pelanggan {$registration->customer_name} ({$registration->registration_code}) telah melengkapi data & TTD virtual. Silakan review dan verifikasi pendaftaran.",
+                'title' => $isRevision ? 'Revisi Data Formulir Masuk!' : 'Form Pendaftaran Baru Masuk!',
+                'message' => $isRevision
+                    ? "Pelanggan {$registration->customer_name} ({$registration->registration_code}) telah mengirimkan revisi perbaikan formulir. Silakan review kembali."
+                    : "Pelanggan {$registration->customer_name} ({$registration->registration_code}) telah melengkapi data & TTD virtual. Silakan review dan verifikasi pendaftaran.",
                 'type' => 'registration_filled',
                 'customer_registration_id' => $registration->id,
                 'link' => route('ccare.show', $registration->id),
@@ -257,8 +266,10 @@ class CustomerFormController extends Controller
         Notification::create([
             'user_id' => $registration->sales_user_id,
             'sales_am_id' => $registration->sales_am_id,
-            'title' => 'Pelanggan Telah Mengisi Formulir!',
-            'message' => "Pelanggan {$registration->customer_name} ({$registration->registration_code}) telah menyelesaikan form pendaftaran. Saat ini sedang menunggu verifikasi C-Care.",
+            'title' => $isRevision ? 'Pelanggan Telah Memperbaiki Formulir!' : 'Pelanggan Telah Mengisi Formulir!',
+            'message' => $isRevision
+                ? "Pelanggan {$registration->customer_name} ({$registration->registration_code}) telah mengirimkan revisi perbaikan data pendaftaran. Saat ini sedang menunggu verifikasi C-Care."
+                : "Pelanggan {$registration->customer_name} ({$registration->registration_code}) telah menyelesaikan form pendaftaran. Saat ini sedang menunggu verifikasi C-Care.",
             'type' => 'registration_filled',
             'customer_registration_id' => $registration->id,
             'link' => null,
@@ -267,13 +278,17 @@ class CustomerFormController extends Controller
             'created_at' => $now,
         ]);
 
-        return redirect()->route('customer-form.success', $token);
+        return redirect()->route('customer-form.success', $token)->with('is_revision', $isRevision);
     }
 
     public function success($token)
     {
-        $registration = CustomerRegistration::with('package')->where('token', $token)->firstOrFail();
-        return view('customer_form.success', compact('registration'));
+        $registration = CustomerRegistration::with(['package', 'progressLogs'])->where('token', $token)->firstOrFail();
+        $isRevision = session('is_revision');
+        if ($isRevision === null) {
+            $isRevision = $registration->progressLogs->where('to_status', 'revision')->isNotEmpty() || ($registration->revision_at !== null);
+        }
+        return view('customer_form.success', compact('registration', 'isRevision'));
     }
 
     /**

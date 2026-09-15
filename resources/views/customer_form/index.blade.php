@@ -910,7 +910,7 @@
 
                         <button type="submit" id="submitBtn"
                                 class="hidden px-4 sm:px-7 py-2.5 sm:py-3 rounded-xl font-bold text-xs sm:text-sm inline-flex items-center justify-center transition-all cursor-pointer">
-                            <span>Kirim</span>
+                            <span>{{ $registration->status === 'revision' ? 'Kirim Revisi' : 'Kirim' }}</span>
                         </button>
                     </div>
 

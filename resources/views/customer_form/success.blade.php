@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pendaftaran Berhasil Dikirim - LifeMedia Fiber</title>
+    <title>{{ ($isRevision ?? false) ? 'Revisi Data Formulir Berhasil Dikirim' : 'Pendaftaran Berhasil Dikirim' }} - LifeMedia Fiber</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ asset('assets/images/favicon.png') }}?v=2">
@@ -143,9 +143,15 @@
         </div>
 
         <div class="space-y-2">
-            <h1 class="text-2xl sm:text-3xl font-extrabold text-[#2C2C2C] tracking-tight">Formulir Pendaftaran Berhasil Dikirim!</h1>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-[#2C2C2C] tracking-tight">
+                {{ ($isRevision ?? false) ? 'Revisi Data Formulir Berhasil Dikirim!' : 'Formulir Pendaftaran Berhasil Dikirim!' }}
+            </h1>
             <p class="text-xs sm:text-sm text-gray-600 max-w-md mx-auto leading-relaxed">
-                Terima kasih, <strong>{{ $registration->customer_name }}</strong>. Data pendaftaran dan tanda tangan virtual Anda telah berhasil tersimpan di sistem LifeMedia.
+                @if($isRevision ?? false)
+                    Terima kasih, <strong>{{ $registration->customer_name }}</strong>. Revisi Data telah berhasil terkirim di sistem LifeMedia.
+                @else
+                    Terima kasih, <strong>{{ $registration->customer_name }}</strong>. Data pendaftaran dan tanda tangan virtual Anda telah berhasil tersimpan di sistem LifeMedia.
+                @endif
             </p>
         </div>
 
