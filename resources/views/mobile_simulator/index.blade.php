@@ -346,42 +346,71 @@
 
                             <!-- Cascading Region Dropdowns -->
                             <div class="space-y-2">
-                                <label class="font-semibold text-[#333333] block">Wilayah Administratif Coverage <span class="text-rose-500">*</span></label>
-                                
+                                <div class="flex items-center justify-between">
+                                    <label class="font-semibold text-[#333333] flex items-center gap-1">
+                                        <span>Wilayah Administratif</span>
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                </div>
+
                                 <div class="grid grid-cols-2 gap-2">
                                     <!-- Provinsi -->
                                     <div>
-                                        <select id="surveyProvinsi" required onchange="onProvinceChange(this.value)"
-                                                class="w-full px-2.5 py-1.5 rounded-xl bg-white border border-gray-200 text-[#333333] text-[11px] focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 shadow-sm">
-                                            <option value="">Pilih Provinsi</option>
-                                            @foreach($provinces as $prov)
-                                                <option value="{{ $prov->name }}" data-id="{{ $prov->id }}">{{ $prov->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Provinsi</label>
+                                        <div class="relative">
+                                            <select id="surveyProvinsi" required onchange="onProvinceChange(this.value)"
+                                                    class="w-full px-2.5 py-1.5 pr-6 rounded-xl bg-white border border-gray-200 text-[#333333] text-[11px] font-medium focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 shadow-sm appearance-none">
+                                                <option value="">Pilih Provinsi</option>
+                                                @foreach($provinces as $prov)
+                                                    <option value="{{ $prov->name }}" data-id="{{ $prov->id }}">{{ $prov->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                                <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!-- Kabupaten/Kota -->
                                     <div>
-                                        <select id="surveyKabupaten" required onchange="onRegencyChange(this.value)"
-                                                class="w-full px-2.5 py-1.5 rounded-xl bg-white border border-gray-200 text-[#333333] text-[11px] focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 shadow-sm">
-                                            <option value="">Pilih Kab/Kota</option>
-                                        </select>
+                                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Kabupaten / Kota</label>
+                                        <div class="relative">
+                                            <select id="surveyKabupaten" required onchange="onRegencyChange(this.value)"
+                                                    class="w-full px-2.5 py-1.5 pr-6 rounded-xl bg-white border border-gray-200 text-[#333333] text-[11px] font-medium focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 shadow-sm appearance-none">
+                                                <option value="">Pilih Kab/Kota</option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                                <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!-- Kecamatan -->
                                     <div>
-                                        <select id="surveyKecamatan" required onchange="onDistrictChange(this.value)"
-                                                class="w-full px-2.5 py-1.5 rounded-xl bg-white border border-gray-200 text-[#333333] text-[11px] focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 shadow-sm">
-                                            <option value="">Pilih Kecamatan</option>
-                                        </select>
+                                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Kecamatan</label>
+                                        <div class="relative">
+                                            <select id="surveyKecamatan" required onchange="onDistrictChange(this.value)"
+                                                    class="w-full px-2.5 py-1.5 pr-6 rounded-xl bg-white border border-gray-200 text-[#333333] text-[11px] font-medium focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 shadow-sm appearance-none">
+                                                <option value="">Pilih Kecamatan</option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                                <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <!-- Kelurahan -->
+                                    <!-- Kelurahan / Desa -->
                                     <div>
-                                        <select id="surveyKelurahan" required
-                                                class="w-full px-2.5 py-1.5 rounded-xl bg-white border border-gray-200 text-[#333333] text-[11px] focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 shadow-sm">
-                                            <option value="">Pilih Kelurahan</option>
-                                        </select>
+                                        <label class="block text-[10px] text-gray-500 font-semibold mb-0.5">Kelurahan / Desa</label>
+                                        <div class="relative">
+                                            <select id="surveyKelurahan" required
+                                                    class="w-full px-2.5 py-1.5 pr-6 rounded-xl bg-white border border-gray-200 text-[#333333] text-[11px] font-medium focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 shadow-sm appearance-none">
+                                                <option value="">Pilih Kelurahan</option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+                                                <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -606,7 +635,9 @@
             switchTab('survey');
             loadMySurveys();
             loadMyNotifications();
-            autoDetectGps(false);
+            loadProvinces().then(() => {
+                autoDetectGps(false);
+            });
         }
 
         function logoutMobile() {
@@ -638,137 +669,237 @@
             if (tab === 'notif') loadMyNotifications();
         }
 
-        // 3. Cascading Dropdowns & Auto-Fetch from GPS
+        // 3. Online Cascading Dropdowns & High-Accuracy GPS Geocoding Engine
         let isAutoFetchingRegions = false;
+        let lastReverseGeocodedCoords = null;
 
-        async function onProvinceChange(provName) {
-            const sel = document.getElementById('surveyProvinsi');
-            const provId = sel.options[sel.selectedIndex]?.getAttribute('data-id');
+        async function loadProvinces(targetProvinceToSelect = null) {
+            const provSelect = document.getElementById('surveyProvinsi');
+            provSelect.innerHTML = '<option value="">Memuat daftar provinsi...</option>';
+
+            try {
+                const res = await fetch('/api/regions/online?type=provinces');
+                const json = await res.json();
+                
+                provSelect.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+                if (json.data && json.data.length > 0) {
+                    json.data.forEach(item => {
+                        provSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
+                    });
+                }
+
+                if (targetProvinceToSelect) {
+                    const match = Array.from(provSelect.options).find(o => 
+                        o.value.toLowerCase() === targetProvinceToSelect.toLowerCase() || 
+                        (o.getAttribute('data-id') && o.getAttribute('data-id') === targetProvinceToSelect)
+                    );
+                    if (match) {
+                        provSelect.value = match.value;
+                    } else if (targetProvinceToSelect) {
+                        provSelect.innerHTML += `<option value="${targetProvinceToSelect}" selected>${targetProvinceToSelect}</option>`;
+                        provSelect.value = targetProvinceToSelect;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading provinces:', err);
+                provSelect.innerHTML = '<option value="">Gagal memuat provinsi</option>';
+            }
+        }
+
+        async function onProvinceChange(provName, targetRegency = null, targetDistrict = null, targetVillage = null) {
+            const provSelect = document.getElementById('surveyProvinsi');
+            const selectedOpt = provSelect.options[provSelect.selectedIndex];
+            const provId = selectedOpt?.getAttribute('data-id');
+
             const kabSelect = document.getElementById('surveyKabupaten');
-            kabSelect.innerHTML = '<option value="">Pilih Kab/Kota</option>';
-            document.getElementById('surveyKecamatan').innerHTML = '<option value="">Pilih Kecamatan</option>';
-            document.getElementById('surveyKelurahan').innerHTML = '<option value="">Pilih Kelurahan</option>';
-
-            if (!provId) return;
-
-            const res = await fetch(`/api/regions?type=kabupaten&parent_id=${provId}`);
-            const json = await res.json();
-            json.data.forEach(item => {
-                kabSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
-            });
-        }
-
-        async function onRegencyChange(regName) {
-            const sel = document.getElementById('surveyKabupaten');
-            const regId = sel.options[sel.selectedIndex]?.getAttribute('data-id');
             const kecSelect = document.getElementById('surveyKecamatan');
-            kecSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-            document.getElementById('surveyKelurahan').innerHTML = '<option value="">Pilih Kelurahan</option>';
-
-            if (!regId) return;
-
-            const res = await fetch(`/api/regions?type=kecamatan&parent_id=${regId}`);
-            const json = await res.json();
-            json.data.forEach(item => {
-                kecSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
-            });
-        }
-
-        async function onDistrictChange(distName) {
-            const sel = document.getElementById('surveyKecamatan');
-            const distId = sel.options[sel.selectedIndex]?.getAttribute('data-id');
             const kelSelect = document.getElementById('surveyKelurahan');
-            kelSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
 
-            if (!distId) return;
+            kabSelect.innerHTML = '<option value="">Memuat Kab/Kota...</option>';
+            kecSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+            kelSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
 
-            const res = await fetch(`/api/regions?type=kelurahan&parent_id=${distId}`);
-            const json = await res.json();
-            json.data.forEach(item => {
-                kelSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
-            });
+            if (!provName) {
+                kabSelect.innerHTML = '<option value="">-- Pilih Kab/Kota --</option>';
+                return;
+            }
+
+            try {
+                let items = [];
+                if (provId) {
+                    const res = await fetch(`/api/regions/online?type=regencies&parent_id=${provId}`);
+                    const json = await res.json();
+                    items = json.data || [];
+                }
+
+                kabSelect.innerHTML = '<option value="">-- Pilih Kab/Kota --</option>';
+                items.forEach(item => {
+                    kabSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
+                });
+
+                if (targetRegency) {
+                    // Normalize name for matching
+                    const cleanTarget = targetRegency.replace(/^(kabupaten|kota)\s*/i, '').toLowerCase().trim();
+                    let match = Array.from(kabSelect.options).find(o => {
+                        const cleanOpt = o.value.replace(/^(kabupaten|kota)\s*/i, '').toLowerCase().trim();
+                        return cleanOpt === cleanTarget || o.value.toLowerCase() === targetRegency.toLowerCase() || o.getAttribute('data-id') === targetRegency;
+                    });
+
+                    if (match) {
+                        kabSelect.value = match.value;
+                    } else if (targetRegency) {
+                        kabSelect.innerHTML += `<option value="${targetRegency}" selected>${targetRegency}</option>`;
+                        kabSelect.value = targetRegency;
+                    }
+                    await onRegencyChange(kabSelect.value, targetDistrict, targetVillage);
+                }
+            } catch (err) {
+                console.error('Error loading regencies:', err);
+                kabSelect.innerHTML = '<option value="">-- Pilih Kab/Kota --</option>';
+            }
         }
 
-        // Auto-select Region Dropdowns based on GPS Reverse Geocoding
-        async function autoFetchRegionsFromGps(lat, lng) {
+        async function onRegencyChange(regName, targetDistrict = null, targetVillage = null) {
+            const kabSelect = document.getElementById('surveyKabupaten');
+            const selectedOpt = kabSelect.options[kabSelect.selectedIndex];
+            const regId = selectedOpt?.getAttribute('data-id');
+
+            const kecSelect = document.getElementById('surveyKecamatan');
+            const kelSelect = document.getElementById('surveyKelurahan');
+
+            kecSelect.innerHTML = '<option value="">Memuat Kecamatan...</option>';
+            kelSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+
+            if (!regName) {
+                kecSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+                return;
+            }
+
+            try {
+                let items = [];
+                if (regId) {
+                    const res = await fetch(`/api/regions/online?type=districts&parent_id=${regId}`);
+                    const json = await res.json();
+                    items = json.data || [];
+                }
+
+                kecSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+                items.forEach(item => {
+                    kecSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
+                });
+
+                if (targetDistrict) {
+                    const cleanTarget = targetDistrict.replace(/^(kecamatan|kec\.)\s*/i, '').toLowerCase().trim();
+                    let match = Array.from(kecSelect.options).find(o => {
+                        const cleanOpt = o.value.replace(/^(kecamatan|kec\.)\s*/i, '').toLowerCase().trim();
+                        return cleanOpt === cleanTarget || o.value.toLowerCase() === targetDistrict.toLowerCase() || o.getAttribute('data-id') === targetDistrict;
+                    });
+
+                    if (match) {
+                        kecSelect.value = match.value;
+                    } else if (targetDistrict) {
+                        kecSelect.innerHTML += `<option value="${targetDistrict}" selected>${targetDistrict}</option>`;
+                        kecSelect.value = targetDistrict;
+                    }
+                    await onDistrictChange(kecSelect.value, targetVillage);
+                }
+            } catch (err) {
+                console.error('Error loading districts:', err);
+                kecSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+            }
+        }
+
+        async function onDistrictChange(distName, targetVillage = null) {
+            const kecSelect = document.getElementById('surveyKecamatan');
+            const selectedOpt = kecSelect.options[kecSelect.selectedIndex];
+            const distId = selectedOpt?.getAttribute('data-id');
+
+            const kelSelect = document.getElementById('surveyKelurahan');
+            kelSelect.innerHTML = '<option value="">Memuat Kelurahan...</option>';
+
+            if (!distName) {
+                kelSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+                return;
+            }
+
+            try {
+                let items = [];
+                if (distId) {
+                    const res = await fetch(`/api/regions/online?type=villages&parent_id=${distId}`);
+                    const json = await res.json();
+                    items = json.data || [];
+                }
+
+                kelSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+                items.forEach(item => {
+                    kelSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
+                });
+
+                if (targetVillage) {
+                    const cleanTarget = targetVillage.replace(/^(kelurahan|desa|kel\.)\s*/i, '').toLowerCase().trim();
+                    let match = Array.from(kelSelect.options).find(o => {
+                        const cleanOpt = o.value.replace(/^(kelurahan|desa|kel\.)\s*/i, '').toLowerCase().trim();
+                        return cleanOpt === cleanTarget || o.value.toLowerCase() === targetVillage.toLowerCase() || o.getAttribute('data-id') === targetVillage;
+                    });
+
+                    if (match) {
+                        kelSelect.value = match.value;
+                    } else if (targetVillage) {
+                        kelSelect.innerHTML += `<option value="${targetVillage}" selected>${targetVillage}</option>`;
+                        kelSelect.value = targetVillage;
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading villages:', err);
+                kelSelect.innerHTML = '<option value="">-- Pilih Kelurahan --</option>';
+            }
+        }
+
+        // Auto-select Region Dropdowns accurately from GPS Reverse Geocoding
+        async function autoFetchRegionsFromGps(lat, lng, isManual = false) {
             if (isAutoFetchingRegions) return;
             isAutoFetchingRegions = true;
+
+            const summaryEl = document.getElementById('detectedRegionSummary');
+            const roadEl = document.getElementById('detectedRoadSummary');
+            if (summaryEl) summaryEl.innerText = 'Menganalisis titik koordinat...';
 
             try {
                 const res = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
                 const json = await res.json();
                 if (json.success && json.data) {
                     const d = json.data;
+                    lastReverseGeocodedCoords = { lat, lng, data: d };
 
-                    // 1. Match Province
+                    // Update live detected summary chip
+                    const detectedText = [d.village, d.district, d.regency, d.province].filter(Boolean).join(', ');
+                    if (summaryEl) summaryEl.innerText = detectedText || 'Terdeteksi dari koordinat';
+                    if (roadEl) roadEl.innerText = d.road ? `Jalan: ${d.road}` : (d.display_name ? `Lokasi: ${d.display_name.split(',')[0]}` : 'Koordinat tervalidasi');
+
+                    // 1. Check or load Provinces
                     const provSelect = document.getElementById('surveyProvinsi');
-                    if (d.province) {
-                        let matchedProv = Array.from(provSelect.options).find(o => o.value === d.province.name || (d.province.id && o.getAttribute('data-id') == d.province.id));
-                        if (matchedProv) {
-                            provSelect.value = matchedProv.value;
-                        }
+                    if (provSelect.options.length <= 1) {
+                        await loadProvinces(d.province);
                     }
 
-                    // 2. Fetch Regencies & Match
-                    const provId = provSelect.options[provSelect.selectedIndex]?.getAttribute('data-id');
-                    if (provId) {
-                        const regRes = await fetch(`/api/regions?type=kabupaten&parent_id=${provId}`);
-                        const regJson = await regRes.json();
-                        const kabSelect = document.getElementById('surveyKabupaten');
-                        kabSelect.innerHTML = '<option value="">Pilih Kab/Kota</option>';
-                        regJson.data.forEach(item => {
-                            kabSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
-                        });
+                    // Find matching province
+                    let targetProvValue = d.province;
+                    let matchedProv = Array.from(provSelect.options).find(o => 
+                        o.value.toLowerCase() === d.province.toLowerCase() || 
+                        (d.province_id && o.getAttribute('data-id') === String(d.province_id))
+                    );
 
-                        if (d.regency) {
-                            let matchedReg = Array.from(kabSelect.options).find(o => o.value === d.regency.name || (d.regency.id && o.getAttribute('data-id') == d.regency.id));
-                            if (matchedReg) {
-                                kabSelect.value = matchedReg.value;
-                            }
-                        }
+                    if (matchedProv) {
+                        provSelect.value = matchedProv.value;
+                    } else if (d.province) {
+                        provSelect.innerHTML += `<option value="${d.province}" data-id="${d.province_id || ''}" selected>${d.province}</option>`;
+                        provSelect.value = d.province;
                     }
 
-                    // 3. Fetch Districts & Match
-                    const kabSelect = document.getElementById('surveyKabupaten');
-                    const regId = kabSelect.options[kabSelect.selectedIndex]?.getAttribute('data-id');
-                    if (regId) {
-                        const kecRes = await fetch(`/api/regions?type=kecamatan&parent_id=${regId}`);
-                        const kecJson = await kecRes.json();
-                        const kecSelect = document.getElementById('surveyKecamatan');
-                        kecSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                        kecJson.data.forEach(item => {
-                            kecSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
-                        });
+                    // 2. Cascade down with accurate Regency, District, and Village
+                    await onProvinceChange(provSelect.value, d.regency, d.district, d.village);
 
-                        if (d.district) {
-                            let matchedDist = Array.from(kecSelect.options).find(o => o.value === d.district.name || (d.district.id && o.getAttribute('data-id') == d.district.id));
-                            if (matchedDist) {
-                                kecSelect.value = matchedDist.value;
-                            }
-                        }
-                    }
-
-                    // 4. Fetch Villages & Match
-                    const kecSelect = document.getElementById('surveyKecamatan');
-                    const distId = kecSelect.options[kecSelect.selectedIndex]?.getAttribute('data-id');
-                    if (distId) {
-                        const kelRes = await fetch(`/api/regions?type=kelurahan&parent_id=${distId}`);
-                        const kelJson = await kelRes.json();
-                        const kelSelect = document.getElementById('surveyKelurahan');
-                        kelSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
-                        kelJson.data.forEach(item => {
-                            kelSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
-                        });
-
-                        if (d.village) {
-                            let matchedVill = Array.from(kelSelect.options).find(o => o.value === d.village.name || (d.village.id && o.getAttribute('data-id') == d.village.id));
-                            if (matchedVill) {
-                                kelSelect.value = matchedVill.value;
-                            }
-                        }
-                    }
-
-                    // 5. Optionally Suggest Road in Address Detail if empty
+                    // 3. Auto-suggest Road to detail address if empty or manual click
                     const addressField = document.getElementById('surveyAddressDetail');
                     if (d.road && (!addressField.value || addressField.value.trim() === '')) {
                         addressField.value = d.road;
@@ -776,9 +907,16 @@
                 }
             } catch (e) {
                 console.warn('Reverse geocode auto-fill error:', e);
+                if (summaryEl) summaryEl.innerText = 'Gagal mendeteksi wilayah otomatis';
             } finally {
                 isAutoFetchingRegions = false;
             }
+        }
+
+        function syncRegionWithCurrentGps() {
+            const lat = parseFloat(document.getElementById('surveyLat').value) || -7.761352;
+            const lng = parseFloat(document.getElementById('surveyLng').value) || 110.385412;
+            autoFetchRegionsFromGps(lat, lng, true);
         }
 
         // 4. GPS & Mini-Map Integration (Ultra-High Precision & Fast Acquisition Engine)
@@ -1034,6 +1172,7 @@
         // Listen for manual coordinate input typing to keep mini-map & regions in sync
         let coordDebounceTimer = null;
         document.addEventListener('DOMContentLoaded', () => {
+            loadProvinces();
             ['surveyLat', 'surveyLng'].forEach(id => {
                 const inputEl = document.getElementById(id);
                 if (inputEl) {

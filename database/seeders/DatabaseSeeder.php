@@ -134,11 +134,18 @@ class DatabaseSeeder extends Seeder
         // 3. Seed Regions (Hierarchical)
         $diy = Region::create(['type' => 'provinsi', 'name' => 'D.I. Yogyakarta', 'code' => 'DIY']);
         $jateng = Region::create(['type' => 'provinsi', 'name' => 'Jawa Tengah', 'code' => 'JTG']);
+        $dki = Region::create(['type' => 'provinsi', 'name' => 'DKI Jakarta', 'code' => 'DKI']);
+        $jabar = Region::create(['type' => 'provinsi', 'name' => 'Jawa Barat', 'code' => 'JBR']);
+        $jatim = Region::create(['type' => 'provinsi', 'name' => 'Jawa Timur', 'code' => 'JTM']);
+        $banten = Region::create(['type' => 'provinsi', 'name' => 'Banten', 'code' => 'BTN']);
+        $bali = Region::create(['type' => 'provinsi', 'name' => 'Bali', 'code' => 'BAL']);
 
-        // DIY -> Sleman, Bantul, Kota Yogyakarta
+        // DIY -> Sleman, Bantul, Kota Yogyakarta, Kulon Progo, Gunungkidul
         $sleman = Region::create(['type' => 'kabupaten', 'parent_id' => $diy->id, 'name' => 'Kabupaten Sleman', 'code' => 'SLM']);
         $bantul = Region::create(['type' => 'kabupaten', 'parent_id' => $diy->id, 'name' => 'Kabupaten Bantul', 'code' => 'BTL']);
         $jogja = Region::create(['type' => 'kabupaten', 'parent_id' => $diy->id, 'name' => 'Kota Yogyakarta', 'code' => 'YK']);
+        $kulonprogo = Region::create(['type' => 'kabupaten', 'parent_id' => $diy->id, 'name' => 'Kabupaten Kulon Progo', 'code' => 'KP']);
+        $gunungkidul = Region::create(['type' => 'kabupaten', 'parent_id' => $diy->id, 'name' => 'Kabupaten Gunungkidul', 'code' => 'GK']);
 
         // Sleman Districts & Villages
         $depok = Region::create(['type' => 'kecamatan', 'parent_id' => $sleman->id, 'name' => 'Kecamatan Depok']);
@@ -171,6 +178,26 @@ class DatabaseSeeder extends Seeder
         Region::create(['type' => 'kelurahan', 'parent_id' => $gondokusuman->id, 'name' => 'Kotabaru']);
         Region::create(['type' => 'kelurahan', 'parent_id' => $gondokusuman->id, 'name' => 'Demangan']);
         Region::create(['type' => 'kelurahan', 'parent_id' => $gondokusuman->id, 'name' => 'Klitren']);
+
+        // Kulon Progo & Gunungkidul Districts & Villages
+        $wates = Region::create(['type' => 'kecamatan', 'parent_id' => $kulonprogo->id, 'name' => 'Kecamatan Wates']);
+        Region::create(['type' => 'kelurahan', 'parent_id' => $wates->id, 'name' => 'Wates']);
+        Region::create(['type' => 'kelurahan', 'parent_id' => $wates->id, 'name' => 'Bendungan']);
+
+        $wonosari = Region::create(['type' => 'kecamatan', 'parent_id' => $gunungkidul->id, 'name' => 'Kecamatan Wonosari']);
+        Region::create(['type' => 'kelurahan', 'parent_id' => $wonosari->id, 'name' => 'Wonosari']);
+        Region::create(['type' => 'kelurahan', 'parent_id' => $wonosari->id, 'name' => 'Kepek']);
+
+        // Jawa Tengah, DKI Jakarta, Jawa Barat Regencies
+        $semarang = Region::create(['type' => 'kabupaten', 'parent_id' => $jateng->id, 'name' => 'Kota Semarang', 'code' => 'SMG']);
+        $klaten = Region::create(['type' => 'kabupaten', 'parent_id' => $jateng->id, 'name' => 'Kabupaten Klaten', 'code' => 'KLT']);
+        $solo = Region::create(['type' => 'kabupaten', 'parent_id' => $jateng->id, 'name' => 'Kota Surakarta', 'code' => 'SOC']);
+
+        $jaksel = Region::create(['type' => 'kabupaten', 'parent_id' => $dki->id, 'name' => 'Kota Administrasi Jakarta Selatan', 'code' => 'JKTS']);
+        $jakpus = Region::create(['type' => 'kabupaten', 'parent_id' => $dki->id, 'name' => 'Kota Administrasi Jakarta Pusat', 'code' => 'JKTP']);
+
+        $bandung = Region::create(['type' => 'kabupaten', 'parent_id' => $jabar->id, 'name' => 'Kota Bandung', 'code' => 'BDG']);
+        $kabBandung = Region::create(['type' => 'kabupaten', 'parent_id' => $jabar->id, 'name' => 'Kabupaten Bandung', 'code' => 'KBDG']);
 
         // 4. Seed Sample Customer Registrations across all stages
         $sales1 = $userMap['sales01@lifemedia.id'];

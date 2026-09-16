@@ -92,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
 Route::prefix('api')->name('api.')->group(function () {
     Route::post('/sales/login', [MobileSimulatorController::class, 'apiLogin'])->name('sales.login');
     Route::get('/regions', [MobileSimulatorController::class, 'apiGetRegions'])->name('regions');
+    Route::get('/regions/online', [MobileSimulatorController::class, 'apiGetOnlineRegions'])->name('regions.online');
     Route::get('/reverse-geocode', [MobileSimulatorController::class, 'apiReverseGeocode'])->name('reverse-geocode');
     Route::post('/sales/survey', [MobileSimulatorController::class, 'apiSubmitSurvey'])->name('sales.survey');
     Route::get('/sales/{salesId}/surveys', [MobileSimulatorController::class, 'apiGetSurveys'])->name('sales.surveys');
