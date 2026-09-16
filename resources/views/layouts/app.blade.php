@@ -263,17 +263,6 @@
                         <span>Audit Log Aktivitas</span>
                     </a>
                 @endif
-
-                <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider px-3 pt-4 pb-1">
-                    Simulator &amp; Integrasi
-                </div>
-
-                <a href="{{ route('mobile-simulator') }}" target="_blank"
-                   class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-[#9B385B] bg-[#FEF4F0] border border-[#F48C5B]/40 hover:bg-[#FDE8E1] transition-all">
-                    <i class="fa-solid fa-mobile-screen-button w-5 text-center text-[#F48C5B]"></i>
-                    <span>Mobile Apps Simulator</span>
-                    <i class="fa-solid fa-arrow-up-right-from-square ml-auto text-xs text-[#9B385B]/70"></i>
-                </a>
             </nav>
 
             <!-- Logout Button -->

@@ -95,5 +95,6 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::post('/sales/survey', [MobileSimulatorController::class, 'apiSubmitSurvey'])->name('sales.survey');
     Route::get('/sales/{salesId}/surveys', [MobileSimulatorController::class, 'apiGetSurveys'])->name('sales.surveys');
     Route::get('/sales/{salesId}/notifications', [MobileSimulatorController::class, 'apiGetNotifications'])->name('sales.notifications');
+    Route::post('/sales/{salesId}/notifications/read-all', [MobileSimulatorController::class, 'apiMarkAllNotificationsRead'])->name('sales.notifications.read-all');
     Route::post('/notifications/{id}/read', [MobileSimulatorController::class, 'apiMarkNotificationRead'])->name('notifications.read');
 });

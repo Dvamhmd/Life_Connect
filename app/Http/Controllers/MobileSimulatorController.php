@@ -224,4 +224,22 @@ class MobileSimulatorController extends Controller
             'message' => 'Notifikasi ditandai telah dibaca.',
         ]);
     }
+
+    public function apiMarkAllNotificationsRead(Request $request, $salesId)
+    {
+        $user = is_numeric($salesId) ? User::find($salesId) : User::where('sales_id', $salesId)->first();
+        Notification::where(function ($q) use ($salesId, $user) {
+            if (is_numeric($salesId)) {
+                $q->where('user_id', $salesId);
+            }
+            if ($user && $user->sales_id) {
+                $q->orWhere('sales_am_id', $user->sales_id);
+            }
+        })->where('is_read', false)->update(['is_read' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Semua notifikasi berhasil ditandai telah dibaca.',
+        ]);
+    }
 }

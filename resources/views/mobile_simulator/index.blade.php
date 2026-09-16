@@ -312,12 +312,16 @@
                                 </div>
                             </div>
 
-                            <!-- GPS Coordinates with Auto-Locate Button -->
+                            <!-- GPS Coordinates with Auto-Locate and High Accuracy -->
                             <div class="space-y-1.5">
                                 <div class="flex items-center justify-between">
-                                    <label class="font-semibold text-[#333333]">Koordinat GPS Lokasi <span class="text-rose-500">*</span></label>
-                                    <button type="button" onclick="autoDetectGps()" class="text-[#EF666B] hover:text-[#9B385B] text-[11px] font-bold flex items-center gap-1 transition-colors">
-                                        <i class="fa-solid fa-location-crosshairs"></i> Ambil GPS
+                                    <label class="font-semibold text-[#333333] flex items-center gap-1.5">
+                                        <span>Koordinat GPS Lokasi</span>
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <button type="button" id="btnDetectGps" onclick="autoDetectGps(true)" class="text-[#EF666B] hover:text-[#9B385B] text-[11px] font-bold flex items-center gap-1 transition-colors px-2 py-0.5 rounded-lg bg-[#FEF4F0] hover:bg-[#FEEBE3] border border-[#F48C5B]/20">
+                                        <i class="fa-solid fa-location-crosshairs" id="iconDetectGps"></i>
+                                        <span id="textDetectGps">Refresh GPS</span>
                                     </button>
                                 </div>
                                 <div class="grid grid-cols-2 gap-2 font-mono">
@@ -325,6 +329,18 @@
                                            class="w-full px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[#EF666B] font-semibold text-[11px] focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 focus:border-[#EF666B] shadow-sm">
                                     <input type="number" step="any" id="surveyLng" value="110.385412" required placeholder="Longitude"
                                            class="w-full px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[#EF666B] font-semibold text-[11px] focus:outline-none focus:ring-2 focus:ring-[#EF666B]/30 focus:border-[#EF666B] shadow-sm">
+                                </div>
+                                <div class="flex items-center justify-between text-[10px] text-gray-500 px-0.5">
+                                    <span id="gpsStatusBadge" class="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-medium">
+                                        <i class="fa-solid fa-satellite text-[9px] text-emerald-600"></i>
+                                        <span id="gpsStatusText">Mendeteksi GPS otomatis...</span>
+                                    </span>
+                                    <span class="text-[9px] text-gray-400">Ketuk / geser pin peta</span>
+                                </div>
+
+                                <!-- Leaflet Mini Map in Simulator -->
+                                <div class="relative w-full h-32 rounded-xl overflow-hidden border border-gray-200 shadow-inner mt-1">
+                                    <div id="surveyMiniMap" class="w-full h-full z-10"></div>
                                 </div>
                             </div>
 
@@ -404,10 +420,19 @@
                     <!-- TAB 3: NOTIFIKASI MASUK -->
                     <div id="tabNotif" class="hidden space-y-3">
                         <div class="flex items-center justify-between text-xs pb-1 border-b border-gray-200">
-                            <span class="font-bold text-[#2C2C2C]">Notifikasi &amp; Aksi Tindak Lanjut</span>
-                            <button type="button" onclick="loadMyNotifications()" class="text-[#EF666B] hover:text-[#9B385B] text-[11px] font-bold">
-                                <i class="fa-solid fa-rotate-right mr-1"></i> Refresh
-                            </button>
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-bold text-[#2C2C2C]">Notifikasi Masuk</span>
+                                <span id="notifTabUnreadBadge" class="hidden px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold shadow-xs">0 Baru</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="markAllNotificationsRead()" class="text-gray-500 hover:text-[#EF666B] text-[10px] font-semibold transition-colors flex items-center gap-1 bg-gray-100 hover:bg-gray-200 px-2 py-0.5 rounded-lg border border-gray-200 shadow-xs" title="Tandai semua telah dibaca">
+                                    <i class="fa-solid fa-check-double text-[9px]"></i>
+                                    <span>Baca Semua</span>
+                                </button>
+                                <button type="button" onclick="loadMyNotifications()" class="text-[#EF666B] hover:text-[#9B385B] text-[11px] font-bold p-0.5" title="Refresh">
+                                    <i class="fa-solid fa-rotate-right"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <div id="notifListContainer" class="space-y-2.5 text-xs">
@@ -581,6 +606,7 @@
             switchTab('survey');
             loadMySurveys();
             loadMyNotifications();
+            autoDetectGps(false);
         }
 
         function logoutMobile() {
@@ -605,6 +631,9 @@
             activeBtn.classList.add('text-[#EF666B]', 'font-bold');
             activeBtn.classList.remove('text-gray-400');
 
+            if (tab === 'survey') {
+                if (miniMap) setTimeout(() => miniMap.invalidateSize(), 150);
+            }
             if (tab === 'history') loadMySurveys();
             if (tab === 'notif') loadMyNotifications();
         }
@@ -658,15 +687,177 @@
             });
         }
 
-        // 4. GPS Auto-detect Simulator
-        function autoDetectGps() {
-            // Preset coordinates around Sleman / Jogja with slight jitter
-            const lat = -7.761352 + (Math.random() - 0.5) * 0.02;
-            const lng = 110.385412 + (Math.random() - 0.5) * 0.02;
-            document.getElementById('surveyLat').value = lat.toFixed(6);
-            document.getElementById('surveyLng').value = lng.toFixed(6);
-            alert('Titik koordinat GPS berhasil diperoleh dari sensor HP!');
+        // 4. GPS & Mini-Map Integration (High Accuracy, Lightweight & Auto-detect)
+        let miniMap = null;
+        let miniMapMarker = null;
+        let isDetectingGps = false;
+
+        function setGpsStatus(state, message) {
+            const badge = document.getElementById('gpsStatusBadge');
+            const textEl = document.getElementById('gpsStatusText');
+            if (!badge || !textEl) return;
+
+            textEl.innerText = message;
+            if (state === 'loading') {
+                badge.className = 'inline-flex items-center gap-1 text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-medium animate-pulse';
+                badge.querySelector('i').className = 'fa-solid fa-spinner fa-spin text-[9px] text-amber-600';
+            } else if (state === 'success') {
+                badge.className = 'inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 font-medium';
+                badge.querySelector('i').className = 'fa-solid fa-satellite text-[9px] text-emerald-600';
+            } else if (state === 'manual') {
+                badge.className = 'inline-flex items-center gap-1 text-[10px] text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200 font-medium';
+                badge.querySelector('i').className = 'fa-solid fa-location-dot text-[9px] text-indigo-600';
+            } else {
+                badge.className = 'inline-flex items-center gap-1 text-[10px] text-gray-600 bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200 font-medium';
+                badge.querySelector('i').className = 'fa-solid fa-circle-info text-[9px] text-gray-500';
+            }
         }
+
+        function initMiniMap(lat, lng) {
+            const latNum = parseFloat(lat);
+            const lngNum = parseFloat(lng);
+            if (isNaN(latNum) || isNaN(lngNum)) return;
+
+            const mapEl = document.getElementById('surveyMiniMap');
+            if (!mapEl) return;
+
+            if (!miniMap) {
+                miniMap = L.map('surveyMiniMap', {
+                    zoomControl: false,
+                    attributionControl: false
+                }).setView([latNum, lngNum], 16);
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19
+                }).addTo(miniMap);
+
+                // Custom marker icon
+                const customIcon = L.divIcon({
+                    className: 'custom-survey-marker',
+                    html: `<div style="background: linear-gradient(135deg, #EF666B, #9B385B); width: 24px; height: 24px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; margin: -12px 0 0 -12px;"><i class="fa-solid fa-location-crosshairs" style="transform: rotate(45deg); font-size: 10px; color: white;"></i></div>`,
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 24]
+                });
+
+                miniMapMarker = L.marker([latNum, lngNum], {
+                    draggable: true,
+                    icon: customIcon
+                }).addTo(miniMap);
+
+                // Drag marker event
+                miniMapMarker.on('dragend', function (e) {
+                    const pos = e.target.getLatLng();
+                    document.getElementById('surveyLat').value = pos.lat.toFixed(6);
+                    document.getElementById('surveyLng').value = pos.lng.toFixed(6);
+                    setGpsStatus('manual', 'Pin digeser manual');
+                });
+
+                // Click on map to reposition pin
+                miniMap.on('click', function (e) {
+                    const pos = e.latlng;
+                    miniMapMarker.setLatLng(pos);
+                    document.getElementById('surveyLat').value = pos.lat.toFixed(6);
+                    document.getElementById('surveyLng').value = pos.lng.toFixed(6);
+                    setGpsStatus('manual', 'Pin disesuaikan di peta');
+                });
+            } else {
+                miniMap.setView([latNum, lngNum], 16);
+                miniMapMarker.setLatLng([latNum, lngNum]);
+                setTimeout(() => miniMap.invalidateSize(), 100);
+            }
+        }
+
+        // Auto-detect GPS with High Accuracy & Lightweight options
+        function autoDetectGps(isManualClick = false) {
+            if (isDetectingGps) return;
+
+            const btn = document.getElementById('btnDetectGps');
+            const icon = document.getElementById('iconDetectGps');
+            const text = document.getElementById('textDetectGps');
+
+            if (!navigator.geolocation) {
+                const currentLat = parseFloat(document.getElementById('surveyLat').value) || -7.761352;
+                const currentLng = parseFloat(document.getElementById('surveyLng').value) || 110.385412;
+                initMiniMap(currentLat, currentLng);
+                setGpsStatus('error', 'Browser tidak mendukung GPS');
+                return;
+            }
+
+            isDetectingGps = true;
+            if (btn) {
+                btn.disabled = true;
+                icon.className = 'fa-solid fa-spinner fa-spin';
+                text.innerText = 'Mengunci...';
+            }
+            setGpsStatus('loading', 'Mencari sinyal GPS akurasi tinggi...');
+
+            const geoOptions = {
+                enableHighAccuracy: true, // Request real hardware GPS / precise cell & Wi-Fi triangulation
+                timeout: 8000,           // 8s timeout to ensure no hanging/sluggishness
+                maximumAge: 30000         // Accept cached coordinates up to 30s for lightweight execution
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = Math.round(position.coords.accuracy || 10);
+
+                    document.getElementById('surveyLat').value = lat.toFixed(6);
+                    document.getElementById('surveyLng').value = lng.toFixed(6);
+
+                    initMiniMap(lat, lng);
+                    setGpsStatus('success', `GPS Terkunci (±${accuracy}m)`);
+
+                    isDetectingGps = false;
+                    if (btn) {
+                        btn.disabled = false;
+                        icon.className = 'fa-solid fa-location-crosshairs';
+                        text.innerText = 'Refresh GPS';
+                    }
+                },
+                function (error) {
+                    console.warn('GPS Error / Permission:', error.message);
+                    const currentLat = parseFloat(document.getElementById('surveyLat').value) || -7.761352;
+                    const currentLng = parseFloat(document.getElementById('surveyLng').value) || 110.385412;
+                    initMiniMap(currentLat, currentLng);
+
+                    if (error.code === error.PERMISSION_DENIED) {
+                        setGpsStatus('error', 'Izin Lokasi Ditolak (Mode Default)');
+                    } else if (error.code === error.TIMEOUT) {
+                        setGpsStatus('error', 'GPS Timeout (Sinyal Lemah)');
+                    } else {
+                        setGpsStatus('error', 'GPS Standar / Manual');
+                    }
+
+                    isDetectingGps = false;
+                    if (btn) {
+                        btn.disabled = false;
+                        icon.className = 'fa-solid fa-location-crosshairs';
+                        text.innerText = 'Refresh GPS';
+                    }
+                },
+                geoOptions
+            );
+        }
+
+        // Listen for manual coordinate input typing to keep mini-map in sync
+        document.addEventListener('DOMContentLoaded', () => {
+            ['surveyLat', 'surveyLng'].forEach(id => {
+                const inputEl = document.getElementById(id);
+                if (inputEl) {
+                    inputEl.addEventListener('input', () => {
+                        const lat = parseFloat(document.getElementById('surveyLat').value);
+                        const lng = parseFloat(document.getElementById('surveyLng').value);
+                        if (!isNaN(lat) && !isNaN(lng) && miniMap && miniMapMarker) {
+                            miniMapMarker.setLatLng([lat, lng]);
+                            miniMap.panTo([lat, lng]);
+                            setGpsStatus('manual', 'Koordinat diubah manual');
+                        }
+                    });
+                }
+            });
+        });
 
         // 5. Submit Survey Form
         document.getElementById('mobileSurveyForm').addEventListener('submit', async function(e) {
@@ -701,6 +892,7 @@
                 if (data.success) {
                     alert('BERHASIL!\n\nData survey ' + payload.customer_name + ' berhasil disubmit ke database Life Connect dengan status: SUBMITTED.\n\nSilakan buka Dashboard OPJ di web browser untuk melakukan verifikasi lokasi.');
                     document.getElementById('mobileSurveyForm').reset();
+                    autoDetectGps(false);
                     switchTab('history');
                 } else {
                     alert('Gagal: ' + (data.message || 'Terjadi kesalahan'));
@@ -817,7 +1009,7 @@
             }
         }
 
-        // 7. Load Notifications
+        // 7. Load Notifications (with Read/Unread distinction & Fade Grey styling)
         async function loadMyNotifications(isSilent = false) {
             if (!currentSales) return;
             const container = document.getElementById('notifListContainer');
@@ -833,7 +1025,8 @@
                     let unreadCount = 0;
 
                     json.data.forEach(item => {
-                        if (!item.is_read) unreadCount++;
+                        const isUnread = !item.is_read;
+                        if (isUnread) unreadCount++;
 
                         let actionHtml = '';
                         const reg = item.registration;
@@ -846,17 +1039,25 @@
                             const waText = `Halo Bapak/Ibu ${custName},\n\nTerima kasih telah mengajukan pendaftaran layanan LifeMedia. Lokasi rumah Anda telah diverifikasi oleh tim teknis kami (OPJ).\n\nSilakan lengkapi data registrasi dan tanda tangan formulir berlangganan melalui tautan resmi LifeMedia berikut:\n${tokenUrl}\n\nSalam hangat,\nTim LifeMedia`;
 
                             // Trigger push banner if unread and not yet toasted
-                            if (!item.is_read && !notifiedIds.has(item.id)) {
+                            if (isUnread && !notifiedIds.has(item.id)) {
                                 notifiedIds.add(item.id);
                                 showPushBanner('verified', custName, phone, waText, tokenUrl, item.id, item.title, item.message);
                             }
 
-                            actionHtml = `
+                            actionHtml = isUnread ? `
                                 <div class="pt-2">
                                     <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', ${item.id}, 'verified')"
                                             class="w-full py-2 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-colors">
                                         <i class="fa-brands fa-whatsapp text-sm"></i>
                                         <span>Bagikan Link WA Ke Pelanggan</span>
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="pt-2">
+                                    <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', ${item.id}, 'verified')"
+                                            class="w-full py-1.5 px-2.5 rounded-xl bg-white hover:bg-emerald-50 text-gray-500 hover:text-emerald-700 border border-gray-200 text-[10.5px] font-medium flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-brands fa-whatsapp text-emerald-600 text-xs"></i>
+                                        <span>Kirim Ulang Link WA</span>
                                     </button>
                                 </div>
                             `;
@@ -866,12 +1067,12 @@
                             const waText = `Halo Bapak/Ibu ${custName},\n\nMohon maaf, pengajuan pendaftaran layanan LifeMedia Anda (${regCode}) memerlukan perbaikan/revisi data oleh tim C-Care.\n\nKategori: ${reason}\nCatatan Revisi: ${notes}\n\nSilakan perbaiki data dan lengkapi dokumen melalui tautan resmi LifeMedia berikut:\n${tokenUrl}\n\nSalam hangat,\nTim LifeMedia`;
 
                             // Trigger push banner if unread and not yet toasted
-                            if (!item.is_read && !notifiedIds.has(item.id)) {
+                            if (isUnread && !notifiedIds.has(item.id)) {
                                 notifiedIds.add(item.id);
                                 showPushBanner('revision', custName, phone, waText, tokenUrl, item.id, item.title, item.message, reason);
                             }
 
-                            actionHtml = `
+                            actionHtml = isUnread ? `
                                 <div class="pt-2">
                                     <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', ${item.id}, 'revision', '${reason}')"
                                             class="w-full py-2 px-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-colors">
@@ -879,51 +1080,95 @@
                                         <span>Kirim Notifikasi Revisi ke WA Pelanggan</span>
                                     </button>
                                 </div>
+                            ` : `
+                                <div class="pt-2">
+                                    <button type="button" onclick="openWaModal('${custName}', '${phone}', \`${waText}\`, '${tokenUrl}', ${item.id}, 'revision', '${reason}')"
+                                            class="w-full py-1.5 px-2.5 rounded-xl bg-white hover:bg-rose-50 text-gray-500 hover:text-rose-700 border border-gray-200 text-[10.5px] font-medium flex items-center justify-center gap-1.5 transition-colors">
+                                        <i class="fa-brands fa-whatsapp text-rose-600 text-xs"></i>
+                                        <span>Kirim Ulang Info Revisi via WA</span>
+                                    </button>
+                                </div>
                             `;
                         } else if (item.type === 'registration_approved') {
-                            if (!item.is_read && !notifiedIds.has(item.id)) {
+                            if (isUnread && !notifiedIds.has(item.id)) {
                                 notifiedIds.add(item.id);
                                 showPushBanner('approved', custName, phone, '', '', item.id, item.title, item.message);
                             }
                             actionHtml = `
-                                <div class="pt-1.5 flex items-center gap-1 text-[10px] text-emerald-700 font-semibold">
-                                    <i class="fa-solid fa-circle-check"></i>
+                                <div class="pt-1.5 flex items-center gap-1 text-[10px] ${isUnread ? 'text-emerald-700 font-semibold' : 'text-gray-400 font-normal'}">
+                                    <i class="fa-solid fa-circle-check ${isUnread ? 'text-emerald-600' : 'text-gray-400'}"></i>
                                     <span>Pendaftaran Disetujui (Siap Pasang)</span>
                                 </div>
                             `;
                         } else if (item.type === 'registration_filled') {
-                            if (!item.is_read && !notifiedIds.has(item.id)) {
+                            if (isUnread && !notifiedIds.has(item.id)) {
                                 notifiedIds.add(item.id);
                                 showPushBanner('filled', custName, phone, '', '', item.id, item.title, item.message);
                             }
                             actionHtml = `
-                                <div class="pt-1.5 flex items-center gap-1 text-[10px] text-indigo-700 font-semibold">
-                                    <i class="fa-solid fa-clock"></i>
+                                <div class="pt-1.5 flex items-center gap-1 text-[10px] ${isUnread ? 'text-indigo-700 font-semibold' : 'text-gray-400 font-normal'}">
+                                    <i class="fa-solid fa-clock ${isUnread ? 'text-indigo-600' : 'text-gray-400'}"></i>
                                     <span>Menunggu Verifikasi C-Care</span>
                                 </div>
                             `;
                         }
 
-                        let cardBorder = item.is_read ? 'border-gray-200 bg-white' : 'border-amber-300 bg-amber-50/50';
-                        let titleColor = item.is_read ? 'text-[#333333]' : 'text-amber-800';
-                        if (item.type === 'registration_revision') {
-                            cardBorder = item.is_read ? 'border-gray-200 bg-white' : 'border-rose-300 bg-rose-50/60';
-                            titleColor = item.is_read ? 'text-[#333333]' : 'text-rose-800';
-                        } else if (item.type === 'survey_verified') {
-                            cardBorder = item.is_read ? 'border-gray-200 bg-white' : 'border-emerald-300 bg-emerald-50/60';
-                            titleColor = item.is_read ? 'text-[#333333]' : 'text-emerald-800';
+                        // Read vs Unread Styles & Badges
+                        let cardClass = '';
+                        let titleClass = '';
+                        let msgClass = '';
+                        let timeClass = '';
+                        let statusBadgeHtml = '';
+
+                        if (isUnread) {
+                            // Unread: Highlighted border, active background glow, bold text
+                            let borderAccent = 'border-amber-400 ring-2 ring-amber-100 bg-white';
+                            if (item.type === 'registration_revision') {
+                                borderAccent = 'border-rose-400 ring-2 ring-rose-100 bg-white';
+                            } else if (item.type === 'survey_verified') {
+                                borderAccent = 'border-emerald-400 ring-2 ring-emerald-100 bg-white';
+                            } else if (item.type === 'registration_filled') {
+                                borderAccent = 'border-indigo-400 ring-2 ring-indigo-100 bg-white';
+                            }
+                            cardClass = `p-3.5 rounded-2xl border-2 ${borderAccent} shadow-md space-y-1.5 transition-all`;
+                            titleClass = 'text-[11.5px] font-extrabold text-[#2C2C2C]';
+                            msgClass = 'text-[11px] text-gray-700 font-medium leading-relaxed';
+                            timeClass = 'text-[9px] font-mono text-gray-400';
+                            statusBadgeHtml = `
+                                <span class="px-1.5 py-0.5 rounded text-[8px] font-extrabold bg-rose-500 text-white flex items-center gap-1 shadow-xs tracking-wider shrink-0">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping"></span> BARU
+                                </span>
+                            `;
+                        } else {
+                            // Read: Faded Grey Effect, muted text, subtle border
+                            cardClass = 'p-3 rounded-2xl border border-gray-200 bg-gray-50/70 opacity-60 hover:opacity-100 transition-opacity space-y-1.5 shadow-xs';
+                            titleClass = 'text-[11px] font-semibold text-gray-400';
+                            msgClass = 'text-[10.5px] text-gray-400 font-normal leading-relaxed';
+                            timeClass = 'text-[9px] font-mono text-gray-300';
+                            statusBadgeHtml = `
+                                <span class="px-1.5 py-0.5 rounded text-[8px] font-medium bg-gray-200/80 text-gray-500 border border-gray-300/60 flex items-center gap-1 shrink-0">
+                                    <i class="fa-solid fa-check-double text-[8px] text-gray-400"></i> DIBACA
+                                </span>
+                            `;
                         }
 
                         html += `
-                            <div class="p-3 rounded-2xl border ${cardBorder} shadow-sm space-y-1.5 transition-all">
-                                <div class="flex items-center justify-between text-[11px] font-bold ${titleColor}">
-                                    <span class="flex items-center gap-1.5">
-                                        ${!item.is_read ? '<span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>' : ''}
-                                        ${item.title}
-                                    </span>
-                                    <span class="text-[9px] font-normal text-gray-400">${new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                            <div class="${cardClass}">
+                                <div class="flex items-center justify-between gap-1.5 pb-1 border-b border-gray-100/80">
+                                    <div class="flex items-center gap-1.5 min-w-0">
+                                        ${statusBadgeHtml}
+                                        <span class="${titleClass} truncate">${item.title}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <span class="${timeClass}">${new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                        ${isUnread ? `
+                                            <button type="button" onclick="markNotificationRead(${item.id})" class="text-[9px] text-[#EF666B] hover:text-[#9B385B] font-semibold underline underline-offset-2 ml-1" title="Tandai sudah dibaca">
+                                                Baca
+                                            </button>
+                                        ` : ''}
+                                    </div>
                                 </div>
-                                <p class="text-[11px] text-gray-600 leading-relaxed">${item.message}</p>
+                                <p class="${msgClass}">${item.message}</p>
                                 ${actionHtml}
                             </div>
                         `;
@@ -931,23 +1176,60 @@
 
                     container.innerHTML = html;
 
+                    // Update Badge Counters
                     const dot = document.getElementById('notifBadgeDot');
                     const countBadge = document.getElementById('notifBadgeCount');
+                    const tabBadge = document.getElementById('notifTabUnreadBadge');
+
                     if (unreadCount > 0) {
                         dot.classList.remove('hidden');
                         countBadge.classList.remove('hidden');
                         countBadge.innerText = unreadCount;
+                        if (tabBadge) {
+                            tabBadge.classList.remove('hidden');
+                            tabBadge.innerText = `${unreadCount} Baru`;
+                        }
                     } else {
                         dot.classList.add('hidden');
                         countBadge.classList.add('hidden');
+                        if (tabBadge) {
+                            tabBadge.classList.add('hidden');
+                        }
                     }
                 } else {
-                    container.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Tidak ada notifikasi baru.</div>';
+                    container.innerHTML = '<div class="text-center py-6 text-gray-400 text-xs">Tidak ada notifikasi.</div>';
                     document.getElementById('notifBadgeDot').classList.add('hidden');
                     document.getElementById('notifBadgeCount').classList.add('hidden');
+                    const tabBadge = document.getElementById('notifTabUnreadBadge');
+                    if (tabBadge) tabBadge.classList.add('hidden');
                 }
             } catch (err) {
                 if (!isSilent) container.innerHTML = '<div class="text-center py-6 text-rose-600 text-xs">Gagal memuat notifikasi.</div>';
+            }
+        }
+
+        async function markNotificationRead(notifId) {
+            try {
+                await fetch(`/api/notifications/${notifId}/read`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+                });
+                loadMyNotifications(true);
+            } catch (err) {
+                console.error('Error marking notification read:', err);
+            }
+        }
+
+        async function markAllNotificationsRead() {
+            if (!currentSales) return;
+            try {
+                await fetch(`/api/sales/${currentSales.id}/notifications/read-all`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+                });
+                loadMyNotifications(true);
+            } catch (err) {
+                console.error('Error marking all notifications read:', err);
             }
         }
 
