@@ -287,10 +287,17 @@
 
             <!-- Alamat Pemasangan -->
             <div class="rounded-3xl bg-white border border-gray-200 p-6 shadow-sm space-y-4 text-xs">
-                <h4 class="font-extrabold text-sm text-[#2C2C2C] border-b border-gray-100 pb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-location-dot text-[#EF666B]"></i>
-                    <span>Lokasi &amp; Alamat Pemasangan</span>
-                </h4>
+                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                    <h4 class="font-extrabold text-sm text-[#2C2C2C] flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-[#EF666B]"></i>
+                        <span>Lokasi &amp; Alamat Pemasangan</span>
+                    </h4>
+                    @if($registration->latitude && $registration->longitude)
+                        <span class="text-[10px] font-mono font-bold text-[#F48C5B] bg-[#FEF4F0] px-2.5 py-1 rounded-lg border border-[#F48C5B]/30">
+                            {{ number_format($registration->latitude, 5) }}, {{ number_format($registration->longitude, 5) }}
+                        </span>
+                    @endif
+                </div>
                 
                 <div class="space-y-3">
                     <div>
@@ -321,14 +328,45 @@
                     </div>
 
                     @if($registration->latitude && $registration->longitude)
+                        <!-- Preview Peta OpenStreetMap (Fast & Lightweight Leaflet) -->
+                        <div class="pt-2 border-t border-gray-100 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-700 block text-[11px] font-bold flex items-center gap-1.5">
+                                    <i class="fa-solid fa-map-location-dot text-[#F48C5B]"></i>
+                                    <span>Pratinjau OpenStreetMap</span>
+                                </span>
+                                <span class="text-[10px] text-gray-400 font-medium">Radius ODP ~150m</span>
+                            </div>
+
+                            <!-- Leaflet OSM Container -->
+                            <div class="relative rounded-2xl overflow-hidden border border-gray-200 shadow-xs bg-slate-100">
+                                <div id="vasLocationMap" style="height: 220px; width: 100%;" class="z-0"></div>
+                                
+                                <!-- Quick Overlay Controls -->
+                                <div class="absolute bottom-2 right-2 z-[400] flex items-center gap-1.5">
+                                    <button type="button" onclick="centerVasLocationMap()" title="Pusatkan ke Titik Rumah"
+                                            class="w-7 h-7 bg-white/95 hover:bg-white text-gray-700 hover:text-[#F48C5B] rounded-lg shadow-sm border border-gray-200 flex items-center justify-center text-xs backdrop-blur-xs transition-colors cursor-pointer">
+                                        <i class="fa-solid fa-crosshairs"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Navigation Quick Actions -->
+                            <div class="pt-1">
+                                <a href="https://maps.google.com/?q={{ $registration->latitude }},{{ $registration->longitude }}" target="_blank" 
+                                   class="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs border border-blue-200 transition-colors">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    <span>Buka di Google Maps</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    @else
                         <div class="pt-2 border-t border-gray-100">
-                            <span class="text-gray-500 block text-[11px] font-medium mb-1.5">Titik Koordinat GPS:</span>
-                            <a href="https://maps.google.com/?q={{ $registration->latitude }},{{ $registration->longitude }}" target="_blank" 
-                               class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-mono text-xs font-bold border border-blue-200 transition-colors w-full justify-center">
-                                <i class="fa-solid fa-map-pin"></i>
-                                <span>{{ $registration->latitude }}, {{ $registration->longitude }}</span>
-                                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] ml-1"></i>
-                            </a>
+                            <div class="rounded-2xl border border-dashed border-gray-200 bg-gray-50 py-4 text-center text-gray-400 text-xs italic">
+                                <i class="fa-solid fa-location-crosshairs text-base mb-1 block"></i>
+                                Koordinat GPS belum tersedia untuk alamat ini.
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -665,6 +703,72 @@
             rotateImage();
         }
     });
+
+    // ==========================================
+    // OpenStreetMap Location Preview Engine
+    // ==========================================
+    @if($registration->latitude && $registration->longitude)
+    let vasMap = null;
+    const vasLat = {{ (float) $registration->latitude }};
+    const vasLng = {{ (float) $registration->longitude }};
+
+    function initVasLocationMap() {
+        const mapContainer = document.getElementById('vasLocationMap');
+        if (!mapContainer || vasMap) return;
+
+        // Lightweight initialization
+        vasMap = L.map('vasLocationMap', {
+            scrollWheelZoom: false,
+            zoomControl: true,
+            attributionControl: true
+        }).setView([vasLat, vasLng], 16);
+
+        // Fast & reliable OSM tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+        }).addTo(vasMap);
+
+        // Custom pinpoint marker with popup
+        const marker = L.marker([vasLat, vasLng]).addTo(vasMap);
+        marker.bindPopup(`
+            <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; line-height: 1.4; padding: 2px;">
+                <strong style="color: #F48C5B; font-size: 12px; display: block; margin-bottom: 2px;">{{ addslashes($registration->customer_name) }}</strong>
+                <span style="color: #475569; display: block; margin-bottom: 4px;">{{ addslashes($registration->full_address) }}</span>
+                <span style="color: #94A3B8; font-family: monospace; font-size: 10px;">${vasLat.toFixed(6)}, ${vasLng.toFixed(6)}</span>
+            </div>
+        `);
+
+        // ODP Coverage Area Indicator (150 meter radius)
+        L.circle([vasLat, vasLng], {
+            color: '#F48C5B',
+            fillColor: '#EF666B',
+            fillOpacity: 0.15,
+            weight: 2,
+            radius: 150
+        }).addTo(vasMap);
+
+        // Invalidate map size after render to avoid tile distortion
+        setTimeout(() => {
+            if (vasMap) vasMap.invalidateSize();
+        }, 250);
+    }
+
+    function centerVasLocationMap() {
+        if (vasMap) {
+            vasMap.setView([vasLat, vasLng], 16);
+            if (vasMap.getZoom() !== 16) {
+                vasMap.setZoom(16);
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initVasLocationMap);
+    } else {
+        initVasLocationMap();
+    }
+    @endif
 </script>
 @endpush
 @endsection
