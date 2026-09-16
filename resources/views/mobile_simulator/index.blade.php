@@ -638,10 +638,12 @@
             if (tab === 'notif') loadMyNotifications();
         }
 
-        // 3. Cascading Dropdowns
+        // 3. Cascading Dropdowns & Auto-Fetch from GPS
+        let isAutoFetchingRegions = false;
+
         async function onProvinceChange(provName) {
             const sel = document.getElementById('surveyProvinsi');
-            const provId = sel.options[sel.selectedIndex].getAttribute('data-id');
+            const provId = sel.options[sel.selectedIndex]?.getAttribute('data-id');
             const kabSelect = document.getElementById('surveyKabupaten');
             kabSelect.innerHTML = '<option value="">Pilih Kab/Kota</option>';
             document.getElementById('surveyKecamatan').innerHTML = '<option value="">Pilih Kecamatan</option>';
@@ -658,7 +660,7 @@
 
         async function onRegencyChange(regName) {
             const sel = document.getElementById('surveyKabupaten');
-            const regId = sel.options[sel.selectedIndex].getAttribute('data-id');
+            const regId = sel.options[sel.selectedIndex]?.getAttribute('data-id');
             const kecSelect = document.getElementById('surveyKecamatan');
             kecSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
             document.getElementById('surveyKelurahan').innerHTML = '<option value="">Pilih Kelurahan</option>';
@@ -674,7 +676,7 @@
 
         async function onDistrictChange(distName) {
             const sel = document.getElementById('surveyKecamatan');
-            const distId = sel.options[sel.selectedIndex].getAttribute('data-id');
+            const distId = sel.options[sel.selectedIndex]?.getAttribute('data-id');
             const kelSelect = document.getElementById('surveyKelurahan');
             kelSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
 
@@ -687,10 +689,104 @@
             });
         }
 
-        // 4. GPS & Mini-Map Integration (High Accuracy, Lightweight & Auto-detect)
+        // Auto-select Region Dropdowns based on GPS Reverse Geocoding
+        async function autoFetchRegionsFromGps(lat, lng) {
+            if (isAutoFetchingRegions) return;
+            isAutoFetchingRegions = true;
+
+            try {
+                const res = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
+                const json = await res.json();
+                if (json.success && json.data) {
+                    const d = json.data;
+
+                    // 1. Match Province
+                    const provSelect = document.getElementById('surveyProvinsi');
+                    if (d.province) {
+                        let matchedProv = Array.from(provSelect.options).find(o => o.value === d.province.name || (d.province.id && o.getAttribute('data-id') == d.province.id));
+                        if (matchedProv) {
+                            provSelect.value = matchedProv.value;
+                        }
+                    }
+
+                    // 2. Fetch Regencies & Match
+                    const provId = provSelect.options[provSelect.selectedIndex]?.getAttribute('data-id');
+                    if (provId) {
+                        const regRes = await fetch(`/api/regions?type=kabupaten&parent_id=${provId}`);
+                        const regJson = await regRes.json();
+                        const kabSelect = document.getElementById('surveyKabupaten');
+                        kabSelect.innerHTML = '<option value="">Pilih Kab/Kota</option>';
+                        regJson.data.forEach(item => {
+                            kabSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
+                        });
+
+                        if (d.regency) {
+                            let matchedReg = Array.from(kabSelect.options).find(o => o.value === d.regency.name || (d.regency.id && o.getAttribute('data-id') == d.regency.id));
+                            if (matchedReg) {
+                                kabSelect.value = matchedReg.value;
+                            }
+                        }
+                    }
+
+                    // 3. Fetch Districts & Match
+                    const kabSelect = document.getElementById('surveyKabupaten');
+                    const regId = kabSelect.options[kabSelect.selectedIndex]?.getAttribute('data-id');
+                    if (regId) {
+                        const kecRes = await fetch(`/api/regions?type=kecamatan&parent_id=${regId}`);
+                        const kecJson = await kecRes.json();
+                        const kecSelect = document.getElementById('surveyKecamatan');
+                        kecSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
+                        kecJson.data.forEach(item => {
+                            kecSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
+                        });
+
+                        if (d.district) {
+                            let matchedDist = Array.from(kecSelect.options).find(o => o.value === d.district.name || (d.district.id && o.getAttribute('data-id') == d.district.id));
+                            if (matchedDist) {
+                                kecSelect.value = matchedDist.value;
+                            }
+                        }
+                    }
+
+                    // 4. Fetch Villages & Match
+                    const kecSelect = document.getElementById('surveyKecamatan');
+                    const distId = kecSelect.options[kecSelect.selectedIndex]?.getAttribute('data-id');
+                    if (distId) {
+                        const kelRes = await fetch(`/api/regions?type=kelurahan&parent_id=${distId}`);
+                        const kelJson = await kelRes.json();
+                        const kelSelect = document.getElementById('surveyKelurahan');
+                        kelSelect.innerHTML = '<option value="">Pilih Kelurahan</option>';
+                        kelJson.data.forEach(item => {
+                            kelSelect.innerHTML += `<option value="${item.name}" data-id="${item.id}">${item.name}</option>`;
+                        });
+
+                        if (d.village) {
+                            let matchedVill = Array.from(kelSelect.options).find(o => o.value === d.village.name || (d.village.id && o.getAttribute('data-id') == d.village.id));
+                            if (matchedVill) {
+                                kelSelect.value = matchedVill.value;
+                            }
+                        }
+                    }
+
+                    // 5. Optionally Suggest Road in Address Detail if empty
+                    const addressField = document.getElementById('surveyAddressDetail');
+                    if (d.road && (!addressField.value || addressField.value.trim() === '')) {
+                        addressField.value = d.road;
+                    }
+                }
+            } catch (e) {
+                console.warn('Reverse geocode auto-fill error:', e);
+            } finally {
+                isAutoFetchingRegions = false;
+            }
+        }
+
+        // 4. GPS & Mini-Map Integration (Ultra-High Precision & Fast Acquisition Engine)
         let miniMap = null;
         let miniMapMarker = null;
         let isDetectingGps = false;
+        let gpsWatchId = null;
+        let gpsLockTimeout = null;
 
         function setGpsStatus(state, message) {
             const badge = document.getElementById('gpsStatusBadge');
@@ -725,7 +821,7 @@
                 miniMap = L.map('surveyMiniMap', {
                     zoomControl: false,
                     attributionControl: false
-                }).setView([latNum, lngNum], 16);
+                }).setView([latNum, lngNum], 17);
 
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19
@@ -744,30 +840,40 @@
                     icon: customIcon
                 }).addTo(miniMap);
 
-                // Drag marker event
+                // Real-time live coordinate update during drag (every micro-movement)
+                miniMapMarker.on('drag', function (e) {
+                    const pos = e.target.getLatLng();
+                    document.getElementById('surveyLat').value = pos.lat.toFixed(6);
+                    document.getElementById('surveyLng').value = pos.lng.toFixed(6);
+                    setGpsStatus('manual', `Menggeser pin (${pos.lat.toFixed(5)}, ${pos.lng.toFixed(5)})`);
+                });
+
+                // When dragging ends, finalize position & auto-fetch regions
                 miniMapMarker.on('dragend', function (e) {
                     const pos = e.target.getLatLng();
                     document.getElementById('surveyLat').value = pos.lat.toFixed(6);
                     document.getElementById('surveyLng').value = pos.lng.toFixed(6);
-                    setGpsStatus('manual', 'Pin digeser manual');
+                    setGpsStatus('manual', 'Pin disesuaikan di peta');
+                    autoFetchRegionsFromGps(pos.lat, pos.lng);
                 });
 
-                // Click on map to reposition pin
+                // Click on map to reposition pin instantly
                 miniMap.on('click', function (e) {
                     const pos = e.latlng;
                     miniMapMarker.setLatLng(pos);
                     document.getElementById('surveyLat').value = pos.lat.toFixed(6);
                     document.getElementById('surveyLng').value = pos.lng.toFixed(6);
                     setGpsStatus('manual', 'Pin disesuaikan di peta');
+                    autoFetchRegionsFromGps(pos.lat, pos.lng);
                 });
             } else {
-                miniMap.setView([latNum, lngNum], 16);
+                miniMap.setView([latNum, lngNum], 17);
                 miniMapMarker.setLatLng([latNum, lngNum]);
                 setTimeout(() => miniMap.invalidateSize(), 100);
             }
         }
 
-        // Auto-detect GPS with High Accuracy & Lightweight options
+        // Ultra-Fast & High Precision Dual-Phase GPS Acquisition Engine
         function autoDetectGps(isManualClick = false) {
             if (isDetectingGps) return;
 
@@ -775,73 +881,158 @@
             const icon = document.getElementById('iconDetectGps');
             const text = document.getElementById('textDetectGps');
 
+            const currentLat = parseFloat(document.getElementById('surveyLat').value) || -7.761352;
+            const currentLng = parseFloat(document.getElementById('surveyLng').value) || 110.385412;
+
+            // Ensure mini map is always rendered right away
+            initMiniMap(currentLat, currentLng);
+
             if (!navigator.geolocation) {
-                const currentLat = parseFloat(document.getElementById('surveyLat').value) || -7.761352;
-                const currentLng = parseFloat(document.getElementById('surveyLng').value) || 110.385412;
-                initMiniMap(currentLat, currentLng);
                 setGpsStatus('error', 'Browser tidak mendukung GPS');
+                autoFetchRegionsFromGps(currentLat, currentLng);
                 return;
+            }
+
+            // Clear any previous active watch / timers
+            if (gpsWatchId !== null) {
+                navigator.geolocation.clearWatch(gpsWatchId);
+                gpsWatchId = null;
+            }
+            if (gpsLockTimeout !== null) {
+                clearTimeout(gpsLockTimeout);
+                gpsLockTimeout = null;
             }
 
             isDetectingGps = true;
             if (btn) {
                 btn.disabled = true;
                 icon.className = 'fa-solid fa-spinner fa-spin';
-                text.innerText = 'Mengunci...';
+                text.innerText = 'Mencari GPS...';
             }
-            setGpsStatus('loading', 'Mencari sinyal GPS akurasi tinggi...');
+            setGpsStatus('loading', 'Mencari sinyal GPS...');
 
-            const geoOptions = {
-                enableHighAccuracy: true, // Request real hardware GPS / precise cell & Wi-Fi triangulation
-                timeout: 8000,           // 8s timeout to ensure no hanging/sluggishness
-                maximumAge: 30000         // Accept cached coordinates up to 30s for lightweight execution
+            let hasAcquiredFastFix = false;
+
+            const resetButton = () => {
+                isDetectingGps = false;
+                if (btn) {
+                    btn.disabled = false;
+                    icon.className = 'fa-solid fa-location-crosshairs';
+                    text.innerText = 'Refresh GPS';
+                }
             };
 
+            // Hard safety timeout: finalize and unblock within 3.5 seconds max
+            gpsLockTimeout = setTimeout(() => {
+                if (isDetectingGps) {
+                    if (!hasAcquiredFastFix) {
+                        setGpsStatus('manual', 'GPS Standar / Gunakan Pin Peta');
+                        autoFetchRegionsFromGps(currentLat, currentLng);
+                    }
+                    resetButton();
+                }
+            }, 3500);
+
+            // Phase 1: Fast Acquisition (Uses cached network/WiFi triangulation for instant response)
             navigator.geolocation.getCurrentPosition(
                 function (position) {
+                    hasAcquiredFastFix = true;
+                    if (gpsLockTimeout) {
+                        clearTimeout(gpsLockTimeout);
+                        gpsLockTimeout = null;
+                    }
+
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
                     const accuracy = Math.round(position.coords.accuracy || 10);
 
                     document.getElementById('surveyLat').value = lat.toFixed(6);
                     document.getElementById('surveyLng').value = lng.toFixed(6);
-
                     initMiniMap(lat, lng);
-                    setGpsStatus('success', `GPS Terkunci (±${accuracy}m)`);
+                    autoFetchRegionsFromGps(lat, lng);
 
-                    isDetectingGps = false;
-                    if (btn) {
-                        btn.disabled = false;
-                        icon.className = 'fa-solid fa-location-crosshairs';
-                        text.innerText = 'Refresh GPS';
+                    if (accuracy <= 25) {
+                        setGpsStatus('success', `GPS Terkunci Presisi (±${accuracy}m)`);
+                    } else {
+                        setGpsStatus('success', `GPS Terkunci (±${accuracy}m)`);
+                    }
+
+                    resetButton();
+
+                    // Phase 2: If accuracy is not optimal and hardware GPS might be available, refine in background without blocking UI
+                    if (accuracy > 20) {
+                        navigator.geolocation.getCurrentPosition(
+                            function (refinedPos) {
+                                const refLat = refinedPos.coords.latitude;
+                                const refLng = refinedPos.coords.longitude;
+                                const refAccuracy = Math.round(refinedPos.coords.accuracy || 10);
+
+                                if (refAccuracy < accuracy) {
+                                    document.getElementById('surveyLat').value = refLat.toFixed(6);
+                                    document.getElementById('surveyLng').value = refLng.toFixed(6);
+                                    initMiniMap(refLat, refLng);
+                                    setGpsStatus('success', `GPS Terkunci Presisi (±${refAccuracy}m)`);
+                                    autoFetchRegionsFromGps(refLat, refLng);
+                                }
+                            },
+                            function (refErr) {
+                                // Background refinement failed silently, initial fast fix is already active
+                            },
+                            { enableHighAccuracy: true, timeout: 3000, maximumAge: 0 }
+                        );
                     }
                 },
                 function (error) {
-                    console.warn('GPS Error / Permission:', error.message);
-                    const currentLat = parseFloat(document.getElementById('surveyLat').value) || -7.761352;
-                    const currentLng = parseFloat(document.getElementById('surveyLng').value) || 110.385412;
-                    initMiniMap(currentLat, currentLng);
+                    // Fallback to high accuracy single-try or default coords
+                    navigator.geolocation.getCurrentPosition(
+                        function (fallbackPos) {
+                            hasAcquiredFastFix = true;
+                            if (gpsLockTimeout) {
+                                clearTimeout(gpsLockTimeout);
+                                gpsLockTimeout = null;
+                            }
+                            const lat = fallbackPos.coords.latitude;
+                            const lng = fallbackPos.coords.longitude;
+                            const accuracy = Math.round(fallbackPos.coords.accuracy || 15);
 
-                    if (error.code === error.PERMISSION_DENIED) {
-                        setGpsStatus('error', 'Izin Lokasi Ditolak (Mode Default)');
-                    } else if (error.code === error.TIMEOUT) {
-                        setGpsStatus('error', 'GPS Timeout (Sinyal Lemah)');
-                    } else {
-                        setGpsStatus('error', 'GPS Standar / Manual');
-                    }
+                            document.getElementById('surveyLat').value = lat.toFixed(6);
+                            document.getElementById('surveyLng').value = lng.toFixed(6);
+                            initMiniMap(lat, lng);
+                            autoFetchRegionsFromGps(lat, lng);
+                            setGpsStatus('success', `GPS Terkunci (±${accuracy}m)`);
+                            resetButton();
+                        },
+                        function (finalErr) {
+                            if (gpsLockTimeout) {
+                                clearTimeout(gpsLockTimeout);
+                                gpsLockTimeout = null;
+                            }
+                            console.warn('GPS Error / Permission:', finalErr.message);
+                            initMiniMap(currentLat, currentLng);
+                            autoFetchRegionsFromGps(currentLat, currentLng);
 
-                    isDetectingGps = false;
-                    if (btn) {
-                        btn.disabled = false;
-                        icon.className = 'fa-solid fa-location-crosshairs';
-                        text.innerText = 'Refresh GPS';
-                    }
+                            if (finalErr.code === finalErr.PERMISSION_DENIED) {
+                                setGpsStatus('error', 'Izin Lokasi Ditolak (Mode Default)');
+                            } else if (finalErr.code === finalErr.TIMEOUT) {
+                                setGpsStatus('error', 'GPS Timeout (Gunakan Pin Peta)');
+                            } else {
+                                setGpsStatus('error', 'GPS Standar / Manual');
+                            }
+                            resetButton();
+                        },
+                        { enableHighAccuracy: true, timeout: 2500, maximumAge: 0 }
+                    );
                 },
-                geoOptions
+                {
+                    enableHighAccuracy: false,
+                    timeout: 2000,
+                    maximumAge: 60000 // Accept recent cached position for instant load
+                }
             );
         }
 
-        // Listen for manual coordinate input typing to keep mini-map in sync
+        // Listen for manual coordinate input typing to keep mini-map & regions in sync
+        let coordDebounceTimer = null;
         document.addEventListener('DOMContentLoaded', () => {
             ['surveyLat', 'surveyLng'].forEach(id => {
                 const inputEl = document.getElementById(id);
@@ -849,10 +1040,16 @@
                     inputEl.addEventListener('input', () => {
                         const lat = parseFloat(document.getElementById('surveyLat').value);
                         const lng = parseFloat(document.getElementById('surveyLng').value);
-                        if (!isNaN(lat) && !isNaN(lng) && miniMap && miniMapMarker) {
-                            miniMapMarker.setLatLng([lat, lng]);
-                            miniMap.panTo([lat, lng]);
+                        if (!isNaN(lat) && !isNaN(lng)) {
+                            if (miniMap && miniMapMarker) {
+                                miniMapMarker.setLatLng([lat, lng]);
+                                miniMap.panTo([lat, lng]);
+                            }
                             setGpsStatus('manual', 'Koordinat diubah manual');
+                            clearTimeout(coordDebounceTimer);
+                            coordDebounceTimer = setTimeout(() => {
+                                autoFetchRegionsFromGps(lat, lng);
+                            }, 800);
                         }
                     });
                 }

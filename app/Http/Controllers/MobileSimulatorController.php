@@ -242,4 +242,138 @@ class MobileSimulatorController extends Controller
             'message' => 'Semua notifikasi berhasil ditandai telah dibaca.',
         ]);
     }
+
+    public function apiReverseGeocode(Request $request)
+    {
+        $lat = $request->query('lat');
+        $lng = $request->query('lng');
+
+        if (!$lat || !$lng) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Latitude dan longitude diperlukan.',
+            ], 400);
+        }
+
+        $addressData = null;
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(3)
+                ->withHeaders([
+                    'User-Agent' => 'LifeConnect-SalesSimulator/1.0',
+                    'Accept-Language' => 'id,en',
+                ])
+                ->get('https://nominatim.openstreetmap.org/reverse', [
+                    'format' => 'jsonv2',
+                    'lat' => $lat,
+                    'lon' => $lng,
+                    'zoom' => 18,
+                    'addressdetails' => 1,
+                ]);
+
+            if ($response->successful()) {
+                $addressData = $response->json();
+            }
+        } catch (\Throwable $e) {
+            // In case of timeout or offline, fallback to DB default lookup
+        }
+
+        $addr = $addressData['address'] ?? [];
+        
+        $state = $addr['state'] ?? $addr['province'] ?? $addr['region'] ?? '';
+        $city = $addr['city'] ?? $addr['county'] ?? $addr['regency'] ?? $addr['city_district'] ?? $addr['town'] ?? '';
+        $district = $addr['municipality'] ?? $addr['suburb'] ?? $addr['district'] ?? '';
+        $village = $addr['village'] ?? $addr['quarter'] ?? $addr['neighbourhood'] ?? $addr['residential'] ?? '';
+        $road = $addr['road'] ?? $addr['pedestrian'] ?? $addr['street'] ?? '';
+        if (!$road && isset($addressData['display_name'])) {
+            $parts = explode(',', $addressData['display_name']);
+            $road = trim($parts[0] ?? '');
+        }
+
+        // Fuzzy match with database regions
+        // 1. Province Match
+        $matchedProvince = null;
+        if ($state) {
+            $matchedProvince = Region::where('type', 'provinsi')
+                ->where(function ($q) use ($state) {
+                    $q->where('name', 'LIKE', "%{$state}%")
+                      ->orWhereRaw('? LIKE CONCAT("%", name, "%")', [$state]);
+                })->first();
+        }
+        if (!$matchedProvince) {
+            $matchedProvince = Region::where('type', 'provinsi')->where('name', 'LIKE', '%Yogyakarta%')->first()
+                ?? Region::where('type', 'provinsi')->first();
+        }
+
+        // 2. Regency Match
+        $matchedRegency = null;
+        if ($matchedProvince) {
+            if ($city) {
+                $cleanCity = trim(str_ireplace(['kabupaten', 'kota'], '', $city));
+                $matchedRegency = Region::where('type', 'kabupaten')
+                    ->where('parent_id', $matchedProvince->id)
+                    ->where(function ($q) use ($city, $cleanCity) {
+                        $q->where('name', 'LIKE', "%{$cleanCity}%")
+                          ->orWhere('name', 'LIKE', "%{$city}%")
+                          ->orWhereRaw('? LIKE CONCAT("%", name, "%")', [$city]);
+                    })->first();
+            }
+            if (!$matchedRegency) {
+                $matchedRegency = Region::where('type', 'kabupaten')
+                    ->where('parent_id', $matchedProvince->id)
+                    ->first();
+            }
+        }
+
+        // 3. District Match
+        $matchedDistrict = null;
+        if ($matchedRegency) {
+            if ($district) {
+                $cleanDist = trim(str_ireplace(['kecamatan', 'distrik', 'kec.'], '', $district));
+                $matchedDistrict = Region::where('type', 'kecamatan')
+                    ->where('parent_id', $matchedRegency->id)
+                    ->where(function ($q) use ($district, $cleanDist) {
+                        $q->where('name', 'LIKE', "%{$cleanDist}%")
+                          ->orWhere('name', 'LIKE', "%{$district}%")
+                          ->orWhereRaw('? LIKE CONCAT("%", name, "%")', [$district]);
+                    })->first();
+            }
+            if (!$matchedDistrict) {
+                $matchedDistrict = Region::where('type', 'kecamatan')
+                    ->where('parent_id', $matchedRegency->id)
+                    ->first();
+            }
+        }
+
+        // 4. Village Match
+        $matchedVillage = null;
+        if ($matchedDistrict) {
+            if ($village) {
+                $cleanVill = trim(str_ireplace(['kelurahan', 'desa', 'kel.'], '', $village));
+                $matchedVillage = Region::where('type', 'kelurahan')
+                    ->where('parent_id', $matchedDistrict->id)
+                    ->where(function ($q) use ($village, $cleanVill) {
+                        $q->where('name', 'LIKE', "%{$cleanVill}%")
+                          ->orWhere('name', 'LIKE', "%{$village}%")
+                          ->orWhereRaw('? LIKE CONCAT("%", name, "%")', [$village]);
+                    })->first();
+            }
+            if (!$matchedVillage) {
+                $matchedVillage = Region::where('type', 'kelurahan')
+                    ->where('parent_id', $matchedDistrict->id)
+                    ->first();
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'province' => $matchedProvince ? ['id' => $matchedProvince->id, 'name' => $matchedProvince->name] : null,
+                'regency' => $matchedRegency ? ['id' => $matchedRegency->id, 'name' => $matchedRegency->name] : null,
+                'district' => $matchedDistrict ? ['id' => $matchedDistrict->id, 'name' => $matchedDistrict->name] : null,
+                'village' => $matchedVillage ? ['id' => $matchedVillage->id, 'name' => $matchedVillage->name] : null,
+                'road' => $road,
+                'raw_address' => $addr,
+            ],
+        ]);
+    }
 }
