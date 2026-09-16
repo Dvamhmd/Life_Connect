@@ -173,8 +173,13 @@
                                     <i class="fa-solid fa-lock"></i>
                                 </span>
                                 <input type="password" name="password" id="password" value="password" required
-                                       class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] text-sm focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-all placeholder:text-gray-400"
+                                       class="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white border border-gray-300 text-[#2C2C2C] text-sm focus:outline-none focus:ring-2 focus:ring-[#F48C5B] focus:border-[#F48C5B] transition-all placeholder:text-gray-400"
                                        placeholder="••••••••">
+                                <button type="button" onclick="togglePasswordVisibility()"
+                                        class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+                                        title="Tampilkan / Sembunyikan Kata Sandi">
+                                    <i id="passwordToggleIcon" class="fa-solid fa-eye text-sm"></i>
+                                </button>
                             </div>
                         </div>
 
@@ -183,7 +188,6 @@
                                 <input type="checkbox" name="remember" class="w-4 h-4 rounded bg-white border-gray-300 text-[#F48C5B] focus:ring-[#F48C5B]">
                                 <span>Ingat Saya</span>
                             </label>
-                            <span class="text-gray-500">Default password: <code class="text-[#9B385B] font-bold">password</code></span>
                         </div>
 
                         <button type="submit" 
@@ -250,6 +254,20 @@
     </div>
 
     <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.getElementById('passwordToggleIcon');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
         function setDemo(email) {
             document.getElementById('email').value = email;
             document.getElementById('password').value = 'password';
